@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>
+// Parámetros de tiempo
+const int green_time = 20;
+const int red_time = 10;
+const int green_time_metro = 10; //aÑADIR un min y max para que no pase siempre igual al mismo tiempo justo.
+const int red_time_metro = 10;
+
+// Canal de sincronización para cambiar luces
+chan change_light;
+
+// Canal de sincronización para indicar paso permitido
+urgent broadcast chan greenCoche; // En vez de broadcast ¡, a lo mejor un canal por semaforo.
+broadcast chan redCoche;
+broadcast chan greenMetro; //Mejor que se llame: MetroSaliendo / MetroAproximando. Cambiar semaforo metro a solo metro (a lo mejor)
+broadcast chan redMetro;
+
+//Añadir nodo entre FueraCruce y Dentro, que sea enParada o aproximandose. Es un punto de no retorno, si llega algo cuando ya has pasado de ahí, se espera él. 
+// Variable enCruce = hay un coche / ambulancia o algo en el cruce. 
+// A lo mejor cambiar coche a otro automata que CUENTE coches que pasan. 
+// Si son cada uno un autómata: Cambia de: Lejos -&gt; Cerca -&gt; Cruzando -&gt; HeCruzado (O no, solo añadir guarda de tiempo a lo que tengo.)
+// Añadir variable para saber como está el semáforo</declaration>
+	<template>
+		<name>SemaforoMetro</name>
+		<declaration>clock t;</declaration>
+		<location id="id0" x="85" y="-102">
+			<name x="94" y="-136">Rojo</name>
+			<label kind="invariant" x="85" y="-85">t &lt;= red_time_metro</label>
+		</location>
+		<location id="id1" x="-280" y="0">
+			<name x="-323" y="-34">Verde</name>
+			<label kind="invariant" x="-399" y="17">t &lt;= green_time_metro</label>
+		</location>
+		<init ref="id1"/>
+		<transition id="id2">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-110" y="34">t &gt;= red_time_metro</label>
+			<label kind="synchronisation" x="-101" y="76">greenMetro!</label>
+			<label kind="assignment" x="-101" y="56">t := 0</label>
+			<nail x="-51" y="25"/>
+		</transition>
+		<transition id="id3">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-178" y="-178">t &gt;= green_time_metro</label>
+			<label kind="synchronisation" x="-178" y="-136">redMetro!</label>
+			<label kind="assignment" x="-178" y="-153">t := 0</label>
+			<nail x="-119" y="-110"/>
+		</transition>
+	</template>
+	<template>
+		<name>SemaforoCoche</name>
+		<declaration>clock t;</declaration>
+		<location id="id4" x="458" y="-102">
+			<name x="467" y="-127">Rojo</name>
+			<label kind="invariant" x="476" y="-110">t &lt;= red_time</label>
+		</location>
+		<location id="id5" x="93" y="0">
+			<name x="34" y="-25">Verde</name>
+			<label kind="invariant" x="-59" y="0">t &lt;= green_time</label>
+		</location>
+		<location id="id6" x="212" y="-110">
+			<committed/>
+		</location>
+		<location id="id7" x="340" y="0">
+			<committed/>
+		</location>
+		<init ref="id4"/>
+		<transition id="id8">
+			<source ref="id4"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="391" y="-42">redMetro?</label>
+		</transition>
+		<transition id="id9">
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="76" y="-93">greenMetro?</label>
+		</transition>
+		<transition id="id10">
+			<source ref="id7"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="229" y="51">greenCoche!</label>
+			<label kind="assignment" x="229" y="34">t := 0</label>
+			<nail x="323" y="17"/>
+			<nail x="280" y="17"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id6"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="297" y="-144">redCoche!</label>
+			<label kind="assignment" x="297" y="-161">t := 0</label>
+			<nail x="246" y="-127"/>
+		</transition>
+	</template>
+	<template>
+		<name>Controlador</name>
+		<declaration>clock t;</declaration>
+		<location id="id12" x="187" y="51">
+			<name x="162" y="60">Espera</name>
+		</location>
+		<init ref="id12"/>
+		<transition id="id13">
+			<source ref="id12"/>
+			<target ref="id12"/>
+			<label kind="guard" x="212" y="-76">t &gt;= red_time_metro</label>
+			<label kind="synchronisation" x="212" y="-59">change_light!</label>
+			<label kind="assignment" x="212" y="-42">t := 0</label>
+			<nail x="348" y="-42"/>
+			<nail x="408" y="-9"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id12"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-63" y="-89">t &gt;= green_time_metro</label>
+			<label kind="synchronisation" x="-63" y="-72">change_light!</label>
+			<label kind="assignment" x="-63" y="-55">t := 0</label>
+			<nail x="17" y="-17"/>
+			<nail x="93" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>Coche</name>
+		<location id="id15" x="-42" y="-8">
+			<name x="-76" y="-42">Espera</name>
+		</location>
+		<location id="id16" x="200" y="0">
+			<name x="190" y="-30">Cruza</name>
+		</location>
+		<init ref="id15"/>
+		<transition id="id17">
+			<source ref="id15"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="59" y="-93">greenCoche?</label>
+			<nail x="85" y="-68"/>
+		</transition>
+		<transition id="id18">
+			<source ref="id16"/>
+			<target ref="id15"/>
+			<label kind="synchronisation" x="59" y="68">redCoche?</label>
+			<nail x="76" y="68"/>
+		</transition>
+	</template>
+	<system>
+// Instanciación
+SemaforoCoche1 = SemaforoCoche();
+SemaforoCoche2 = SemaforoCoche();
+SemaforoMetro1 = SemaforoMetro();
+//SemaforoMetro2 = SemaforoMetro();
+Control = Controlador();
+Vehiculo1 = Coche();
+Vehiculo2 = Coche();
+
+// Declaración del sistema
+system SemaforoCoche1, SemaforoCoche2, SemaforoMetro1, Control, Vehiculo1, Vehiculo2;
+  </system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment>El sistema nunca entra en deadlock</comment>
+			<result outcome="success" type="quality" timestamp="2025-04-21 00:25:52 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Vehiculo1.Cruza</formula>
+			<comment>El vehículo 1 puede cruzar eventualmente</comment>
+			<result outcome="success" type="quality" timestamp="2025-04-21 00:25:55 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Semaforo1.Verde and Semaforo2.Verde</formula>
+			<comment>Ambos semáforos pueden estar en verde al mismo tiempo</comment>
+			<result outcome="success" type="quality" timestamp="2025-04-21 00:25:58 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A[] (Semaforo1.Verde imply Semaforo2.Verde) &amp;&amp; (Semaforo2.Verde imply Semaforo1.Verde)</formula>
+			<comment>Ambos semáforos están sincronizados (verdes al mismo tiempo)</comment>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+	</queries>
+</nta>

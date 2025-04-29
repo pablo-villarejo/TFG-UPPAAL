@@ -5,73 +5,73 @@
 // Parámetros de tiempo
 const int green_time = 20;
 const int red_time = 10;
-const int green_time_metro = 10;
-const int red_time_metro = 10;
+const int tParadaMax = 15;
+const int tParadaMin = 10;
+const int tMetroLejosMax = 90;
+const int tMetroLejosMin = 50;
 
-boolean semaforcoche [2]= {0,0} ; //0 -&gt; rojo 1 -&gt; verde
-// Canal de sincronización para cambiar luces
-chan change_light;
+bool semaforoCoche[2]= {0,0} ; //0 -&gt; rojo 1 -&gt; verde
+bool enCruce;
 
 // Canal de sincronización para indicar paso permitido
 broadcast chan greenCoche[2];
 broadcast chan  redCoche [2];
-urgent broadcast chan greenMetro;
-urgent broadcast chan redMetro;</declaration>
+urgent broadcast chan metroAproximando;
+urgent broadcast chan metroSaliendo;</declaration>
 	<template>
-		<name>SemaforoMetro</name>
+		<name>Metro</name>
 		<declaration>clock t;</declaration>
-		<location id="id0" x="85" y="-102">
-			<name x="94" y="-136">FueraCruce</name>
-			<label kind="invariant" x="85" y="-85">t &lt;= red_time_metro</label>
+		<location id="id0" x="315" y="-110">
+			<name x="324" y="-144">FueraCruce</name>
+			<label kind="invariant" x="331" y="-119">t &lt;= tMetroLejosMax</label>
 		</location>
-		<location id="id1" x="-340" y="-34">
-			<name x="-383" y="-68">DentroCruce</name>
-			<label kind="invariant" x="-459" y="-17">t &lt;= green_time_metro</label>
+		<location id="id1" x="-416" y="-8">
+			<name x="-459" y="-42">DentroCruce</name>
+			<label kind="invariant" x="-569" y="-17">t &lt;= tParadaMax</label>
 		</location>
-		<location id="id2" x="-187" y="25">
-			<name x="-197" y="-9">enLaParada</name>
-			<label kind="invariant" x="-272" y="51">t&lt;= tparadamax</label>
+		<location id="id2" x="102" y="119">
+			<name x="92" y="85">enLaParada</name>
+			<label kind="invariant" x="43" y="136">t&lt;= tParadaMax</label>
 		</location>
-		<location id="id3" x="-272" y="136">
-			<name x="-246" y="119">Alarma</name>
+		<location id="id3" x="-271" y="162">
+			<name x="-296" y="179">Alarma</name>
 		</location>
 		<init ref="id1"/>
 		<transition id="id4">
 			<source ref="id3"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-374" y="59">encruce</label>
-			<label kind="assignment" x="-322" y="51">t:=0</label>
+			<label kind="guard" x="-391" y="102">!enCruce</label>
+			<label kind="assignment" x="-391" y="119">t:=0</label>
 		</transition>
 		<transition id="id5">
 			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-229" y="85">encruce</label>
+			<label kind="guard" x="-152" y="145">enCruce</label>
 		</transition>
 		<transition id="id6">
 			<source ref="id2"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-289" y="-42">!encruce &amp; t&gt;= tparadamin</label>
-			<label kind="assignment" x="-280" y="-25">t := 0</label>
+			<label kind="guard" x="-246" y="-17">!enCruce</label>
+			<label kind="assignment" x="-246" y="0">t := 0</label>
 		</transition>
 		<transition id="id7">
 			<source ref="id0"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-110" y="34">t &gt;= red_time_metro</label>
-			<label kind="synchronisation" x="-101" y="76">aproximando!</label>
-			<label kind="assignment" x="-101" y="56">t := 0</label>
-			<nail x="-51" y="25"/>
+			<label kind="synchronisation" x="332" y="43">metroAproximando!</label>
+			<label kind="assignment" x="332" y="26">t := 0</label>
+			<nail x="306" y="102"/>
 		</transition>
 		<transition id="id8">
 			<source ref="id1"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-178" y="-178">t &gt;= green_time_metro</label>
-			<label kind="synchronisation" x="-178" y="-136">saliendo!</label>
-			<label kind="assignment" x="-178" y="-153">t := 0</label>
-			<nail x="-119" y="-110"/>
+			<label kind="synchronisation" x="-255" y="-110">metroSaliendo!</label>
+			<label kind="assignment" x="-255" y="-136">t := 0</label>
+			<nail x="-195" y="-84"/>
 		</transition>
 	</template>
 	<template>
 		<name>SemaforoCoche</name>
+		<parameter>int[0,1] d</parameter>
 		<declaration>clock t;</declaration>
 		<location id="id9" x="458" y="-102">
 			<name x="467" y="-127">Rojo</name>
@@ -89,17 +89,17 @@ urgent broadcast chan redMetro;</declaration>
 		<transition id="id13">
 			<source ref="id9"/>
 			<target ref="id12"/>
-			<label kind="synchronisation" x="391" y="-42">redMetro?</label>
+			<label kind="synchronisation" x="391" y="-42">metroSaliendo?</label>
 		</transition>
 		<transition id="id14">
 			<source ref="id10"/>
 			<target ref="id11"/>
-			<label kind="synchronisation" x="76" y="-93">greenMetro?</label>
+			<label kind="synchronisation" x="17" y="-85">metroAproximando?</label>
 		</transition>
 		<transition id="id15">
 			<source ref="id12"/>
 			<target ref="id10"/>
-			<label kind="synchronisation" x="229" y="51">greenCoche!</label>
+			<label kind="synchronisation" x="229" y="51">greenCoche[d]!</label>
 			<label kind="assignment" x="229" y="34">t := 0</label>
 			<nail x="323" y="17"/>
 			<nail x="280" y="17"/>
@@ -107,98 +107,82 @@ urgent broadcast chan redMetro;</declaration>
 		<transition id="id16">
 			<source ref="id11"/>
 			<target ref="id9"/>
-			<label kind="synchronisation" x="297" y="-144">redCoche!</label>
+			<label kind="synchronisation" x="297" y="-144">redCoche[d]!</label>
 			<label kind="assignment" x="297" y="-161">t := 0</label>
 			<nail x="246" y="-127"/>
 		</transition>
 	</template>
 	<template>
-		<name>Controlador</name>
-		<declaration>clock t;</declaration>
-		<location id="id17" x="187" y="51">
-			<name x="162" y="60">Espera</name>
-		</location>
-		<init ref="id17"/>
-		<transition id="id18">
-			<source ref="id17"/>
-			<target ref="id17"/>
-			<label kind="guard" x="212" y="-76">t &gt;= red_time_metro</label>
-			<label kind="synchronisation" x="212" y="-59">change_light!</label>
-			<label kind="assignment" x="212" y="-42">t := 0</label>
-			<nail x="348" y="-42"/>
-			<nail x="408" y="-9"/>
-		</transition>
-		<transition id="id19">
-			<source ref="id17"/>
-			<target ref="id17"/>
-			<label kind="guard" x="-63" y="-89">t &gt;= green_time_metro</label>
-			<label kind="synchronisation" x="-63" y="-72">change_light!</label>
-			<label kind="assignment" x="-63" y="-55">t := 0</label>
-			<nail x="17" y="-17"/>
-			<nail x="93" y="-34"/>
-		</transition>
-	</template>
-	<template>
 		<name>Coche</name>
-		<location id="id20" x="-68" y="-85">
-			<name x="-145" y="-145">EsperaPorRojo</name>
+		<parameter>int[0,1] d</parameter>
+		<declaration>clock t;</declaration>
+		<location id="id17" x="-68" y="-110">
+			<name x="-145" y="-170">EsperaPorRojo</name>
 		</location>
-		<location id="id21" x="200" y="0">
-			<name x="190" y="-30">Cruzando</name>
-			<label kind="invariant" x="190" y="17">t&lt;=2</label>
+		<location id="id18" x="200" y="0">
+			<name x="195" y="-34">Cruzando</name>
+			<label kind="invariant" x="195" y="17">t&lt;=2</label>
 		</location>
-		<location id="id22" x="25" y="93">
-			<name x="15" y="59">HaCruzado</name>
-			<label kind="invariant" x="15" y="110">t&lt;=100</label>
+		<location id="id19" x="25" y="93">
+			<name x="-8" y="102">HaCruzado</name>
+			<label kind="invariant" x="0" y="127">t&lt;=100</label>
 		</location>
-		<location id="id23" x="-195" y="0">
+		<location id="id20" x="-195" y="0">
 		</location>
-		<init ref="id23"/>
-		<transition id="id24">
-			<source ref="id23"/>
-			<target ref="id21"/>
-			<label kind="guard" x="-93" y="-51">semaforocoche[d] = 1</label>
-			<label kind="assignment" x="-59" y="-17">t:=0</label>
-			<nail x="-59" y="-25"/>
-		</transition>
-		<transition id="id25">
-			<source ref="id23"/>
-			<target ref="id20"/>
-			<label kind="guard" x="-272" y="-76">semaforocoche[d] =0</label>
-		</transition>
-		<transition id="id26">
-			<source ref="id22"/>
-			<target ref="id23"/>
-			<label kind="guard" x="-102" y="68">t&gt;=100</label>
-		</transition>
-		<transition id="id27">
+		<init ref="id20"/>
+		<transition id="id21">
 			<source ref="id20"/>
-			<target ref="id21"/>
-			<label kind="synchronisation" x="42" y="-119">greenCoche?</label>
-			<label kind="assignment" x="51" y="-93">t:=0</label>
-			<nail x="33" y="-93"/>
+			<target ref="id18"/>
+			<label kind="guard" x="-68" y="-42">semaforoCoche[d] = 1</label>
+			<label kind="assignment" x="-68" y="-25">t:=0</label>
+			<nail x="-59" y="0"/>
+		</transition>
+		<transition id="id22">
+			<source ref="id20"/>
+			<target ref="id17"/>
+			<label kind="guard" x="-306" y="-85">semaforoCoche[d] = 0</label>
+		</transition>
+		<transition id="id23">
+			<source ref="id19"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-110" y="59">t&gt;=100</label>
+		</transition>
+		<transition id="id24">
+			<source ref="id17"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="42" y="-153">greenCoche[d]?</label>
+			<label kind="assignment" x="42" y="-127">t:=0</label>
+			<nail x="34" y="-102"/>
 			<nail x="109" y="-93"/>
 		</transition>
-		<transition id="id28">
-			<source ref="id21"/>
-			<target ref="id22"/>
-			<label kind="guard" x="76" y="25">t&gt;=1</label>
+		<transition id="id25">
+			<source ref="id18"/>
+			<target ref="id19"/>
+			<label kind="guard" x="85" y="25">t&gt;=1</label>
 			<nail x="76" y="68"/>
 		</transition>
 	</template>
 	<system>
 // Instanciación
-SemaforoCoche1 = SemaforoCoche();
-SemaforoCoche2 = SemaforoCoche();
-SemaforoMetro1 = SemaforoMetro();
-//SemaforoMetro2 = SemaforoMetro();
-Control = Controlador();
-Vehiculo1 = Coche();
-Vehiculo2 = Coche();
+SemaforoCoche1 = SemaforoCoche(0); // 0 es dirección ascendente, 1 es descendente.
+SemaforoCoche2 = SemaforoCoche(1); 
+Metro1 = Metro();
+//Metro2 = Metro();
+Coche1 = Coche(0); // 0 es dirección ascendente, 1 es descendente.
+Coche2 = Coche(1);
 
 // Declaración del sistema
-system SemaforoCoche1, SemaforoCoche2, SemaforoMetro1, Control, Vehiculo1, Vehiculo2;
-  </system>
+system SemaforoCoche1, SemaforoCoche2, Metro1, Coche1, Coche2;
+
+
+/*
+Al añadir una direccion: int[0,1] d tanto a SemaforoCoche como a Coche, he tenido varios problemas que he resuelto así:
+
+- En SemaforoCoche, he tenido que añadir [d] a las sync de los canales.
+- Las guardas de reloj no se permiten en "urgent edges", así que he tenido que eliminarlas.
+- En coche, me da el error: "Guard must be side-effect_free". No entiendo por qué ocurre ni sé solucionarlo.
+
+*/</system>
 	<queries>
 		<query>
 			<formula>A[] not deadlock</formula>

@@ -12,7 +12,7 @@ const int tMetroLejosMin = 50;
 
 bool semaforoCoche[2]= {0,0} ; //0 -&gt; rojo 1 -&gt; verde
 int cochesEnCruce = 0;
-int metrosEnCruce = 0;
+int metrosEnCruce = 2; //Empieza en 2 porque los metros (siempre 2) empiezan ambos dentro del cruce
 
 // Canal de sincronización para indicar paso permitido
 broadcast chan greenCoche[2];
@@ -93,7 +93,8 @@ metrosEnCruce--</label>
 		<transition id="id13">
 			<source ref="id9"/>
 			<target ref="id12"/>
-			<label kind="synchronisation" x="391" y="-42">metroSaliendo?</label>
+			<label kind="guard" x="408" y="-51">metrosEnCruce == 1</label>
+			<label kind="synchronisation" x="408" y="-34">metroSaliendo?</label>
 		</transition>
 		<transition id="id14">
 			<source ref="id10"/>
@@ -132,6 +133,7 @@ metrosEnCruce--</label>
 			<label kind="invariant" x="0" y="127">t&lt;=100</label>
 		</location>
 		<location id="id20" x="-195" y="0">
+			<name x="-289" y="-8">Llegando</name>
 		</location>
 		<init ref="id20"/>
 		<transition id="id21">
@@ -154,7 +156,6 @@ metrosEnCruce--</label>
 		<transition id="id24">
 			<source ref="id17"/>
 			<target ref="id18"/>
-			<label kind="guard" x="42" y="-195">metrosEnCruce == 0</label>
 			<label kind="synchronisation" x="42" y="-178">greenCoche[d]?</label>
 			<label kind="assignment" x="42" y="-153">t:=0 ,
 cochesEnCruce++</label>

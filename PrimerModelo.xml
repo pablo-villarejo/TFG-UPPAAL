@@ -16,8 +16,8 @@ bool enCruce;
 // Canal de sincronización para indicar paso permitido
 broadcast chan greenCoche[2];
 broadcast chan  redCoche [2];
-urgent broadcast chan metroAproximando;
-urgent broadcast chan metroSaliendo;</declaration>
+broadcast chan metroAproximando; //Era urgent, se lo quitamos para que no de error
+broadcast chan metroSaliendo;    //Era urgent, se lo quitamos para que no de error</declaration>
 	<template>
 		<name>Metro</name>
 		<declaration>clock t;</declaration>
@@ -133,14 +133,14 @@ urgent broadcast chan metroSaliendo;</declaration>
 		<transition id="id21">
 			<source ref="id20"/>
 			<target ref="id18"/>
-			<label kind="guard" x="-68" y="-42">semaforoCoche[d] = 1</label>
+			<label kind="guard" x="-68" y="-42">semaforoCoche[d] == 1</label>
 			<label kind="assignment" x="-68" y="-25">t:=0</label>
 			<nail x="-59" y="0"/>
 		</transition>
 		<transition id="id22">
 			<source ref="id20"/>
 			<target ref="id17"/>
-			<label kind="guard" x="-306" y="-85">semaforoCoche[d] = 0</label>
+			<label kind="guard" x="-306" y="-85">semaforoCoche[d] == 0</label>
 		</transition>
 		<transition id="id23">
 			<source ref="id19"/>
@@ -150,15 +150,17 @@ urgent broadcast chan metroSaliendo;</declaration>
 		<transition id="id24">
 			<source ref="id17"/>
 			<target ref="id18"/>
-			<label kind="synchronisation" x="42" y="-153">greenCoche[d]?</label>
-			<label kind="assignment" x="42" y="-127">t:=0</label>
+			<label kind="synchronisation" x="42" y="-178">greenCoche[d]?</label>
+			<label kind="assignment" x="42" y="-153">t:=0 ,
+enCruce = true</label>
 			<nail x="34" y="-102"/>
 			<nail x="109" y="-93"/>
 		</transition>
 		<transition id="id25">
 			<source ref="id18"/>
 			<target ref="id19"/>
-			<label kind="guard" x="85" y="25">t&gt;=1</label>
+			<label kind="guard" x="119" y="51">t&gt;=1</label>
+			<label kind="assignment" x="119" y="68">enCruce = false</label>
 			<nail x="76" y="68"/>
 		</transition>
 	</template>

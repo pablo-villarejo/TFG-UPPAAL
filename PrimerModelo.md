@@ -27,6 +27,7 @@ En este primer modelo se simula un cruce entre coches y un metro. El objetivo es
 - Se modelan múltiples instancias de coches y semáforos para simular concurrencia.
 - Se usan canales para sincronización entre procesos (metroAproximando, metroSaliendo...).
 - En semáforoCoche, al pasar de rojo a verde, se comprueba que no haya ningún metro en el cruce. Pero se hace con: Guard: _metrosEnCruce == 1_ Sync: _metroSaliendo?_. El 1 se debe a que este último metro es el que está saliendo del cruce y manda el _metroSaliendo!_. Con _metrosEnCruce == 0_ no funciona (Preguntar a Laura y Mmar).
+- Ahora mismo los coches solo cruzan cuando su semáforo CAMBIA de rojo a verde, no cuando ESTÁ en verde. Posible problema.
 
 ## 🐞 Problemas encontrados y soluciones
 

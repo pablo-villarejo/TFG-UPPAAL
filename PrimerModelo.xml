@@ -195,25 +195,25 @@ Al añadir una direccion: int[0,1] d tanto a SemaforoCoche como a Coche, he teni
 		<query>
 			<formula>A[] not deadlock</formula>
 			<comment>El sistema nunca entra en deadlock</comment>
-			<result outcome="success" type="quality" timestamp="2025-04-21 00:25:52 +0200">
+			<result outcome="success" type="quality" timestamp="2025-05-08 15:27:49 +0200">
 			</result>
 		</query>
 		<query>
-			<formula>E&lt;&gt; Vehiculo1.Cruza</formula>
+			<formula>E&lt;&gt; Coche1.Cruzando</formula>
 			<comment>El vehículo 1 puede cruzar eventualmente</comment>
-			<result outcome="success" type="quality" timestamp="2025-04-21 00:25:55 +0200">
+			<result outcome="success" type="quality" timestamp="2025-05-08 15:29:35 +0200">
 			</result>
 		</query>
 		<query>
-			<formula>E&lt;&gt; Semaforo1.Verde and Semaforo2.Verde</formula>
+			<formula>E&lt;&gt; SemaforoCoche1.Verde and SemaforoCoche2.Verde</formula>
 			<comment>Ambos semáforos pueden estar en verde al mismo tiempo</comment>
-			<result outcome="success" type="quality" timestamp="2025-04-21 00:25:58 +0200">
+			<result outcome="success" type="quality" timestamp="2025-05-08 15:28:27 +0200">
 			</result>
 		</query>
 		<query>
-			<formula>A[] (Semaforo1.Verde imply Semaforo2.Verde) &amp;&amp; (Semaforo2.Verde imply Semaforo1.Verde)</formula>
+			<formula>A[] (SemaforoCoche1.Verde imply SemaforoCoche2.Verde) &amp;&amp; (SemaforoCoche2.Verde imply SemaforoCoche1.Verde)</formula>
 			<comment>Ambos semáforos están sincronizados (verdes al mismo tiempo)</comment>
-			<result outcome="failure" type="quality" timestamp="2025-04-21 00:30:46 +0200">
+			<result outcome="failure" type="quality" timestamp="2025-05-08 15:29:05 +0200">
 			</result>
 		</query>
 		<query>

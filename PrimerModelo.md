@@ -13,6 +13,13 @@ En este primer modelo se simula un cruce entre coches y un metro. El objetivo es
 - [X] Control del flujo de coches en ambos sentidos.
 - [X] Semáforos también en ambos sentidos.
 
+## ☑️ Propiedades verificadas
+
+- [X] El sistema no se bloquea.
+- [X] El Coche1 cruza eventualmente.
+- [X] Ambos semáforos pueden estar en verde al mismo tiempo.
+- [ ] Ambos semáforos están sincronizados.
+
 ## 💡 Consideraciones del diseño
 
 - El semáforo actúa como controlador central que regula el acceso al cruce.

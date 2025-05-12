@@ -12,7 +12,6 @@ En este segundo modelo, se trabaja usando el modelo anterior como base. Se añad
 
 - [X] Propiedad 1.
 
-
 ## 💡 Consideraciones del diseño
 
 - Consideración 1.

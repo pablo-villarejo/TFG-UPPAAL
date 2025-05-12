@@ -26,8 +26,10 @@ En este primer modelo se simula un cruce entre coches y un metro. El objetivo es
 - El metro tiene prioridad, no necesita semáforo para esta iteración, pero verifica condiciones de seguridad antes de cruzar.
 - Se modelan múltiples instancias de coches y semáforos para simular concurrencia.
 - Se usan canales para sincronización entre procesos (metroAproximando, metroSaliendo...).
-- En semáforoCoche, al pasar de rojo a verde, se comprueba que no haya ningún metro en el cruce. Pero se hace con: Guard: _metrosEnCruce == 1_ Sync: _metroSaliendo?_. El 1 se debe a que este último metro es el que está saliendo del cruce y manda el _metroSaliendo!_. Con _metrosEnCruce == 0_ no funciona (Preguntar a Laura y Mmar).
-- Ahora mismo los coches solo cruzan cuando su semáforo CAMBIA de rojo a verde, no cuando ESTÁ en verde. Posible problema.
+- En semáforoCoche, al pasar de rojo a verde, se comprueba que no haya ningún metro en el cruce. Pero se hace con: Guard: _metrosEnCruce == 1_ Sync: _metroSaliendo?_. El 1 se debe a que este último metro es el que está saliendo del cruce y manda el _metroSaliendo!_.
+- El flujo es "infinito". Los mismos coches y metros circulan ciclicamente por el cruce. Al llegar al final, suponemos que "reaparecen" al principio.
+- Al ser "infinito" el flujo, las propiedades de verificación tardan un tiempo considerablemente grande en comprobarse. 
+
 
 ## 🐞 Problemas encontrados y soluciones
 

@@ -16,9 +16,11 @@ En este primer modelo se simula un cruce entre coches y un metro. El objetivo es
 ## ☑️ Propiedades verificadas
 
 - [X] El sistema no se bloquea.
-- [X] El Coche1 cruza eventualmente.
+- [X] El Coche1 y el Coche2 cruzan eventualmente. (Puesto ahora mismo con ||, con && no se cumple)
+- [X] El Metro1 y el Metro2 cruzan eventualmente. (Puesto ahora mismo con ||, con && no se cumple)
 - [X] Ambos semáforos pueden estar en verde al mismo tiempo.
-- [ ] Ambos semáforos están sincronizados.
+- [X] Ambos semáforos están sincronizados. Es decir, no puede estar uno en verde y otro en rojo. A veces no están ambos verdes o rojos a la vez debido a que hay estados "commited" entre Verde y Rojo.
+- [X] Si el Coche1 está llegando, entonces cruzará eventualmente.
 
 ## 💡 Consideraciones del diseño
 

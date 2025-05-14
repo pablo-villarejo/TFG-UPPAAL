@@ -64,7 +64,7 @@ t &gt;= tParadaMax</label>
 		<transition id="id7">
 			<source ref="id2"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-119" y="-17">cochesEnCruce == 0 &amp;&amp;
+			<label kind="guard" x="-119" y="-25">cochesEnCruce == 0 &amp;&amp;
 t &gt;= tParadaMin</label>
 			<label kind="assignment" x="-119" y="25">t := 0 , 
 metrosEnCruce++</label>
@@ -225,7 +225,6 @@ Simulando "ir despacito" porque lo ves rojo de lejos.
 
 Nuevas propiedades:
 
-No puede ser cochesEncruce &gt; 0 y metrosEnCruce &gt; 0 a la vez.
 Mismo Semaforo algun momento en rojo y otro en verde.
 Existe alguna combinacion con dos metros en el cruce a la vez. Que sea posible.
 Existe alguna combinacion con dos coches en el cruce a la vez. Que sea posible.
@@ -268,6 +267,16 @@ Si el metro esta en alarma --&gt; Esta DentroCruce. Va a consumir y tardar mucho
 			<comment>Cuando el coche está llegando, después en algún momento cruza.</comment>
 			<result outcome="success" type="quality" timestamp="2025-05-12 12:50:02 +0200">
 			</result>
+		</query>
+		<query>
+			<formula>A[] !(cochesEnCruce &gt; 0 &amp;&amp; metrosEnCruce &gt; 0)</formula>
+			<comment>No puede ser cochesEncruce &gt; 0 y metrosEnCruce &gt; 0 a la vez.</comment>
+			<result outcome="failure" type="quality" timestamp="2025-05-14 19:13:04 +0200">
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
 		</query>
 		<query>
 			<formula/>

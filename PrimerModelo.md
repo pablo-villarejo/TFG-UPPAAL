@@ -31,6 +31,9 @@ En este primer modelo se simula un cruce entre coches y un metro. El objetivo es
 - En semáforoCoche, al pasar de rojo a verde, se comprueba que no haya ningún metro en el cruce. Pero se hace con: Guard: _metrosEnCruce == 1_ Sync: _metroSaliendo?_. El 1 se debe a que este último metro es el que está saliendo del cruce y manda el _metroSaliendo!_.
 - El flujo es "infinito". Los mismos coches y metros circulan ciclicamente por el cruce. Al llegar al final, suponemos que "reaparecen" al principio.
 - Al ser "infinito" el flujo, las propiedades de verificación tardan un tiempo considerablemente grande en comprobarse. 
+- En coche, de llegando a espera por rojo, en vez de _t >= tCocheLLegaSemaforoMin_, ponemos _t >= tCocheLLegaSemaforoMax_ para simular "ir despacito" porque ves el semáforo rojo de lejos.
+- En cuanto a la dirección, 0 es ascendente y 1 es descendente. En cuanto a los semáforos, 0 es rojo y 1 es verde. 
+
 
 
 ## 🐞 Problemas encontrados y soluciones

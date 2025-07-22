@@ -481,11 +481,8 @@ Mean estimate of displayed sample: 21.98 ± 1.048 (95% CI)</comment>
 			</result>
 		</query>
 		<query>
-			<formula>Pr[&lt;= 10] (&lt;&gt; Metro1.Alarma)</formula>
+			<formula>Pr[&lt;= 30] (&lt;&gt; Metro1.Alarma)</formula>
 			<comment>Probabilidad de que el metro esté menos de 30 unidades de tiempo en alarma.</comment>
-			<result outcome="success" type="interval" value="≤ 0.0499441 (95% CI)" timestamp="2025-05-17 17:22:40 +0200">
-				<details>≤ 0.0499441 (95% CI)</details>
-			</result>
 		</query>
 	</queries>
 </nta>

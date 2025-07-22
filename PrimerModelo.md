@@ -2,7 +2,7 @@
 
 ## 📜 Descripción del modelo
 
-En este primer modelo se simula un cruce entre coches y un metro. El objetivo es gestionar el flujo de tráfico y garantizar la seguridad en el cruce. Se implementan semáforos que regulan el paso de los coches y permiten a estos y al metro cruzar sin problemas. La principal funcionalidad de este modelo es la sincronización entre el semáforo de coches y el metro, asegurando que el metro solo cruce cuando no hay coches en el cruce, y que los coches solo crucen cuando el semáforo se lo permite (es decir, cuando el metro no está cruzando ni está cerca del cruce).
+En este primer modelo se simula un cruce entre coches y metro. El objetivo es gestionar el flujo de tráfico y garantizar la seguridad en el cruce. Se implementan semáforos que regulan el paso de los coches y permiten a estos y al metro cruzar sin problemas. La principal funcionalidad de este modelo es la sincronización entre el semáforo de coches y el metro, asegurando que el metro solo cruce cuando no hay coches en el cruce, y que los coches solo crucen cuando el semáforo se lo permite (es decir, cuando el metro no está cruzando ni está cerca del cruce).
 
 ## ✅ Requisitos implementados
 
@@ -27,6 +27,7 @@ En este primer modelo se simula un cruce entre coches y un metro. El objetivo es
 - [X] En ningún momento hay algún coche y metro en el cruce al mismo tiempo.
 - [X] Existe alguna combinacion con dos coches en el cruce a la vez, es posible.
 - [X] Existe alguna combinacion con dos metros en el cruce a la vez, es posible.
+- [X] La probabilidad de que el coche tarde menos de 30 unidades de tiempo en cruzar es alta (95%).
 
 ## 💡 Consideraciones del diseño
 

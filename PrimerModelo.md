@@ -54,6 +54,8 @@ Controla el estado del semáforo que regula el paso de los coches.
 - [X] El sistema no se bloquea.
 - [X] El Coche1 y el Coche2 cruzan eventualmente en todas las trazas.
 - [X] El Metro1 y el Metro2 cruzan eventualmente en todas las trazas.
+- [X] Existe alguna traza en la que eventualmente el Metro1 y el Metro2 entran en estado de alarma.
+- [X] Cuando el Metro1 y el Metro2 están en estado de Alarma, después en algún momento, cruzan.
 - [X] Ambos semáforos pueden estar en verde al mismo tiempo.
 - [X] Ambos semáforos están sincronizados. Es decir, no puede estar uno en verde y otro en rojo. A veces no están ambos verdes o rojos a la vez debido a que hay estados "commited" entre Verde y Rojo.
 - [X] Cuando el Coche1 está llegando, después en algún momento, cruza.
@@ -81,7 +83,8 @@ Controla el estado del semáforo que regula el paso de los coches.
 - En cuanto a la dirección, 0 es ascendente y 1 es descendente.
 - En cuanto a los semáforos, 0 es rojo y 1 es verde.
 - Si nos interesara cambiar el estado inicial del metro a `dentroCruce`, deberíamos cambiar la variable _metrosEnCruce_ a 2 y _metrosEnParada_ a 0. Si no, el modelo no se comportará como esperamos.
-- El tiempo que ha tardado mi ordenador en verificar las 19 propiedades ha sido de 7 minutos y 30 segundos.
+- El tiempo que ha tardado mi ordenador en verificar las 23 propiedades ha sido de 8 minutos.
+- Tras tener el modelo funcionando a grandes rasgos, he ido modificando los parametros de tiempo tanto de coches como de metros para que se ejecuten las trazas de la manera más realista posible. 
 
 
 
@@ -89,9 +92,11 @@ Controla el estado del semáforo que regula el paso de los coches.
 
 | Problema                                      | Solución aplicada                                |
 |----------------------------------------------|--------------------------------------------------|
-| El uso de un boolean `enCruce` compartido, da problemas de sincronización ya que tenemos varios coches  | Reemplazado por __contador__ `cochesEnCruce`         |
-| El canal `metroSaliendo` da problemas de sincronización similares al problema anterior, ya que tenemos 2 metros | Añadir un __contador__ `metrosEnCruce`   |
-| Las propiedades de verificación no se cumplen si cambiamos el estado incial de metro a `EnParada` | El problema estaba en las propiedades globales, ya que iniciaba la variable __metrosEnCruce__ a 2 y __metrosEnParada__ a 0, y he tenido que intercambiarlas. |
+| El uso de un boolean `enCruce` compartido, da problemas de sincronización ya que tenemos varios coches.  | Reemplazado por __contador__ `cochesEnCruce`.  |
+| El canal `metroSaliendo` da problemas de sincronización similares al problema anterior, ya que tenemos 2 metros. | Añadir un __contador__ `metrosEnCruce`.   |
+| Las propiedades de verificación no se cumplen si cambiamos el estado incial de metro a `EnParada.` | El problema estaba en las propiedades globales, ya que iniciaba la variable __metrosEnCruce__ a 2 y __metrosEnParada__ a 0, y he tenido que intercambiarlas. |
+| El estado de `Alarma` del metro no llega a visitarse nunca. | He cambiado los tiempos de tiempo que tarda en cruzar los coches para que haya alguna probabilidad, aunque sea baja, de que el metro entre en alarma. |
+| El Metro puede quedarse en el estado de `Alarma` en bucle. | He añadido la guarda de que solo pueda volver a entrar en el estado de `Alarma` si sigue habiendo coches en el cruce. |
 
 ## 📈 Posibles mejoras futuras
 

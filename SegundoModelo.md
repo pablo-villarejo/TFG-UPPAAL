@@ -50,7 +50,7 @@ Controla el estado del semáforo que regula el paso de los coches.
 
 ## 💡 Consideraciones del diseño
 
-- Consideración 1.
+- Como primera solución de esta iteración, creo que lo más correcto es suponer que, mientras los semáforos superiores de la calle Jiménez Fraud estén en verde, los semáforos inferiores de esa misma calle también deberían estarlo. Además, el semáforo del Boulevard Louis Pasteur estará en rojo durante todo ese tiempo. Este último sólo se pondrá en verde cuando los semáforos de Jiménez Fraud estén en rojo (porque esté pasando el metro). Esto nos dará un sistema seguro, aunque no muy eficiente, ya que el tiempo de espera para los coches del Boulevard Louis Pasteur será considerablemente mayor. Esto se solucionará más adelante en esta iteración, o dependiendo de su complejidad, en iteraciones futuras.
 
 ## 🐞 Problemas encontrados y soluciones
 

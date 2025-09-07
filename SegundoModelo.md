@@ -52,7 +52,7 @@ Controla el estado del semáforo que regula el paso de los coches.
 
 ## 💡 Consideraciones del diseño
 
-- Como primera solución de esta iteración, creo que lo más correcto es suponer que, mientras los semáforos superiores de la calle Jiménez Fraud estén en verde, los semáforos inferiores de esa misma calle también deberían estarlo. Además, el semáforo del Boulevard Louis Pasteur estará en rojo durante todo ese tiempo. Este último sólo se pondrá en verde cuando los semáforos de Jiménez Fraud estén en rojo (porque esté pasando el metro). Esto nos dará un sistema seguro, aunque no muy eficiente, ya que el tiempo de espera para los coches del Boulevard Louis Pasteur será considerablemente mayor. Esto se solucionará más adelante en esta iteración, o dependiendo de su complejidad, en iteraciones futuras.
+- Como primera solución de esta iteración, creo que lo más correcto es suponer que, mientras los semáforos superiores de la calle Jiménez Fraud estén en verde, los semáforos inferiores de esa misma calle también deberían estarlo. Además, el semáforo del Boulevard Louis Pasteur estará en rojo durante todo ese tiempo. Este último sólo se pondrá en verde cuando los semáforos de Jiménez Fraud estén en rojo (porque esté pasando el metro). Esto nos dará un sistema seguro, aunque no muy eficiente quizás, ya que el tiempo de espera para los coches del Boulevard Louis Pasteur será considerablemente mayor. Esto se solucionará más adelante en esta iteración, o dependiendo de su complejidad, en iteraciones futuras.
 
 - Suponemos que los coches en el cruce inferior cruzarán relativamente rápido (máx = 7 y min = 2), lo que nos ayudará a minimizar el tiempo de espera en el semáforo.
 
@@ -75,34 +75,3 @@ Controla el estado del semáforo que regula el paso de los coches.
 
 - `SegundoModelo.xml`: Segunda iteración, añadiendo nuevos semáforos en la parte inferior de la calle.
 - `SegundoModelo.md`: Documento de descripción del modelo.
-
-
-🔹 Básicas (comportamiento esperado)
-
- El CocheInferior1 y el CocheInferior2 cruzan eventualmente en todas las trazas.
-
- Cuando el CocheInferior1 está llegando, después en algún momento cruza.
-
- Cuando el CocheInferior1 está en espera por rojo, después en algún momento cruza.
-
- Si el SemaforoCocheInferior está en rojo, entonces estará en verde eventualmente.
-
-🔹 Intermedias (propiedades de consistencia)
-
- En ningún momento hay un CocheInferior y un coche de la calle principal cruzando en el mismo cruce inferior al mismo tiempo.
-
- Los semáforos inferiores están sincronizados con los semáforos superiores (si los superiores están en verde, los inferiores también lo están).
-
- Existe alguna traza en la que dos coches inferiores están cruzando a la vez.
-
- Existe alguna traza en la que un coche inferior y un coche superior están cruzando a la vez, pero en cruces distintos (permitido).
-
-🔹 Probabilísticas (rendimiento/eficiencia)
-
- La probabilidad de que el CocheInferior1 llegue al estado cruzando en menos de 50 unidades de tiempo es alta (>95%). (plazo más largo que los coches de la principal, para reflejar su peor acceso)
-
- La probabilidad de que el CocheInferior2 llegue al estado cruzando en menos de 50 unidades de tiempo es alta (>95%).
-
- La probabilidad de que un coche inferior tenga que esperar más de 200 unidades de tiempo en el semáforo es significativa (>30%). (espera larga, porque depende del metro que fuerza el rojo en la principal)
-
- La probabilidad de que un coche inferior cruce sin detenerse (pasa de "LlegandoInf" a "CruzandoInf" sin pasar por "EsperaInf") es baja (<20%). (ya que casi siempre le tocará esperar al depender del metro)

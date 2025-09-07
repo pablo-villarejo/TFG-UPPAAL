@@ -1,0 +1,969 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>
+// Parámetros de tiempo de Metro
+const int tParadaMax = 15;
+const int tParadaMin = 10;
+const int tMetroEnCruceMax = 10;
+const int tMetroEnCruceMin = 5;
+const int tMetroLejosMax = 90;
+const int tMetroLejosMin = 50;
+
+// Parámetros de tiempo de Coche
+const int tCocheLLegaSemaforoMax = 30;
+const int tCocheLLegaSemaforoMin = 15;
+const int tCocheEnCruceMax = 15;
+const int tCocheEnCruceMin = 5;
+const int tCocheLejosMax = 90;
+const int tCocheLejosMin = 50;
+
+bool semaforoCoche[2]= {0,0} ; //0 -&gt; rojo 1 -&gt; verde
+int cochesEnCruce = 0;
+int metrosEnCruce = 0;  //Si el estado incial es "DentroCruce", hay que ponerlo a 2.
+int metrosEnParada = 2; //Empieza a 2 si tenemos "enLaParada" como estado inicial
+
+// Canal de sincronización para indicar paso permitido
+broadcast chan greenCoche[2];
+broadcast chan  redCoche [2];
+broadcast chan metroAproximando; //No es necesario que sea urgent
+broadcast chan metroSaliendo;    //No es necesario que sea urgent
+
+// ITERACIÓN 3:
+// Parámetros de tiempo de Ambulancia
+const int tAmbLLegaSemaforoMax = 10;
+const int tAmbLLegaSemaforoMin = 3;
+const int tAmbEnCruceMax = 8;
+const int tAmbEnCruceMin = 3;
+const int tAmbLejosMax = 500;
+const int tAmbLejosMin = 200;
+
+int ambulanciaEnCruce = 0;</declaration>
+	<template>
+		<name>Ambulancia</name>
+		<parameter>int[0,1] d</parameter>
+		<declaration>clock t;</declaration>
+		<location id="id0" x="-399" y="-161">
+			<name x="-399" y="-212">Llegando</name>
+			<label kind="invariant" x="-459" y="-195">t &lt;= tAmbLLegaSemaforoMax</label>
+		</location>
+		<location id="id1" x="408" y="-161">
+			<name x="399" y="-229">Cruzando</name>
+			<label kind="invariant" x="399" y="-204">t &lt;= tAmbEnCruceMax</label>
+		</location>
+		<location id="id2" x="0" y="119">
+			<name x="-34" y="136">HaCruzado</name>
+			<label kind="invariant" x="-43" y="153">t &lt;= tAmbLejosMax</label>
+		</location>
+		<init ref="id0"/>
+		<transition id="id3">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-518" y="-59">metrosEnCruce != 0 &amp;&amp;
+t &gt;= 1</label>
+			<label kind="assignment" x="-544" y="-17">t := tAmbLLegaSemaforoMin</label>
+			<nail x="-399" y="-68"/>
+			<nail x="-484" y="-68"/>
+		</transition>
+		<transition id="id4">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-289" y="25">t &gt;= tAmbLejosMin</label>
+			<label kind="assignment" x="-238" y="42">t := 0</label>
+		</transition>
+		<transition id="id5">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="255" y="34">t &gt;= tAmbEnCruceMin</label>
+			<label kind="assignment" x="255" y="59">t := 0,
+ambulanciaEnCruce--</label>
+		</transition>
+		<transition id="id6">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-136" y="-255">t &gt;= tAmbLLegaSemaforoMin &amp;&amp; 
+metrosEnCruce == 0</label>
+			<label kind="assignment" x="-136" y="-204">t := 0,
+ambulanciaEnCruce++</label>
+		</transition>
+	</template>
+	<template>
+		<name>Metro</name>
+		<declaration>clock t;</declaration>
+		<location id="id7" x="425" y="-8">
+			<name x="434" y="-42">FueraCruce</name>
+			<label kind="invariant" x="441" y="-17">t &lt;= tMetroLejosMax</label>
+		</location>
+		<location id="id8" x="-306" y="94">
+			<name x="-391" y="42">DentroCruce</name>
+			<label kind="invariant" x="-476" y="59">t &lt;= tMetroEnCruceMax</label>
+		</location>
+		<location id="id9" x="212" y="221">
+			<name x="202" y="187">enLaParada</name>
+			<label kind="invariant" x="161" y="238">t&lt;= tParadaMax</label>
+		</location>
+		<location id="id10" x="-161" y="264">
+			<name x="-170" y="229">Alarma</name>
+			<label kind="invariant" x="-170" y="212">t &lt;= 5</label>
+		</location>
+		<init ref="id9"/>
+		<transition id="id11">
+			<source ref="id10"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-195" y="374">t == 5 &amp;&amp;
+(cochesEnCruce != 0 ||
+ambulanciaEnCruce != 0)</label>
+			<label kind="assignment" x="-195" y="442">t := 0</label>
+			<nail x="-111" y="357"/>
+			<nail x="-213" y="357"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id10"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-433" y="212">ambulanciaEnCruce == 0 &amp;&amp;
+cochesEnCruce == 0 &amp;&amp;
+t &gt;= 0</label>
+			<label kind="assignment" x="-433" y="272">t:=0 , 
+metrosEnCruce++,
+metrosEnParada--</label>
+		</transition>
+		<transition id="id13">
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-59" y="263">(ambulanciaEnCruce != 0 ||
+cochesEnCruce != 0) &amp;&amp;
+t &gt;= tParadaMax</label>
+			<label kind="assignment" x="-59" y="323">t := 0</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-8" y="51">ambulanciaEnCruce == 0 &amp;&amp;
+cochesEnCruce == 0 &amp;&amp;
+t &gt;= tParadaMin</label>
+			<label kind="assignment" x="-8" y="110">t := 0 , 
+metrosEnCruce++,
+metrosEnParada--</label>
+		</transition>
+		<transition id="id15">
+			<source ref="id7"/>
+			<target ref="id9"/>
+			<label kind="guard" x="441" y="110">t &gt;= tMetroLejosMin</label>
+			<label kind="synchronisation" x="441" y="136">metroAproximando!</label>
+			<label kind="assignment" x="441" y="161">t := 0,
+metrosEnParada++</label>
+			<nail x="416" y="204"/>
+		</transition>
+		<transition id="id16">
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-144" y="-76">t &gt;= tMetroEnCruceMin</label>
+			<label kind="synchronisation" x="-145" y="-59">metroSaliendo!</label>
+			<label kind="assignment" x="-145" y="-42">t := 0, 
+metrosEnCruce--</label>
+			<nail x="-85" y="18"/>
+		</transition>
+	</template>
+	<template>
+		<name>SemaforoCoche</name>
+		<parameter>int[0,1] d</parameter>
+		<declaration>clock t;</declaration>
+		<location id="id17" x="331" y="-153">
+			<name x="340" y="-178">Rojo</name>
+		</location>
+		<location id="id18" x="-34" y="-51">
+			<name x="-93" y="-76">Verde</name>
+		</location>
+		<location id="id19" x="85" y="-161">
+			<committed/>
+		</location>
+		<location id="id20" x="213" y="-51">
+			<committed/>
+		</location>
+		<init ref="id17"/>
+		<transition id="id21">
+			<source ref="id17"/>
+			<target ref="id20"/>
+			<label kind="guard" x="289" y="-119">metrosEnCruce == 1 &amp;&amp;
+metrosEnParada == 0</label>
+			<label kind="synchronisation" x="289" y="-85">metroSaliendo?</label>
+			<label kind="comments" x="391" y="-59">La guarda es:
+metrosEnCruce == 1
+En vez de 0, porque ese último metro es 
+el que manda la señal de metroSaliendo?</label>
+		</transition>
+		<transition id="id22">
+			<source ref="id18"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-110" y="-136">metroAproximando?</label>
+		</transition>
+		<transition id="id23">
+			<source ref="id20"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="102" y="17">greenCoche[d]!</label>
+			<label kind="assignment" x="102" y="-9">semaforoCoche[d] = 1</label>
+			<nail x="196" y="-34"/>
+			<nail x="153" y="-34"/>
+		</transition>
+		<transition id="id24">
+			<source ref="id19"/>
+			<target ref="id17"/>
+			<label kind="synchronisation" x="170" y="-238">redCoche[d]!</label>
+			<label kind="assignment" x="170" y="-221">semaforoCoche[d] = 0</label>
+			<nail x="119" y="-178"/>
+		</transition>
+	</template>
+	<template>
+		<name>Coche</name>
+		<parameter>int[0,1] d</parameter>
+		<declaration>clock t;</declaration>
+		<location id="id25" x="-119" y="-238">
+			<name x="-178" y="-280">EsperaPorRojo</name>
+		</location>
+		<location id="id26" x="204" y="0">
+			<name x="221" y="-17">Cruzando</name>
+			<label kind="invariant" x="238" y="25">t&lt;=tCocheEnCruceMax</label>
+		</location>
+		<location id="id27" x="-76" y="170">
+			<name x="-110" y="187">HaCruzado</name>
+			<label kind="invariant" x="-102" y="212">t&lt;=tCocheLejosMax</label>
+		</location>
+		<location id="id28" x="-425" y="0">
+			<name x="-519" y="-8">Llegando</name>
+			<label kind="invariant" x="-654" y="17">t &lt;= tCocheLLegaSemaforoMax</label>
+		</location>
+		<init ref="id28"/>
+		<transition id="id29">
+			<source ref="id28"/>
+			<target ref="id26"/>
+			<label kind="guard" x="-195" y="-93">semaforoCoche[d] == 1 &amp;&amp; 
+t &gt;= tCocheLLegaSemaforoMin</label>
+			<label kind="assignment" x="-195" y="-50">t:=0,
+cochesEnCruce++</label>
+			<nail x="-59" y="0"/>
+		</transition>
+		<transition id="id30">
+			<source ref="id28"/>
+			<target ref="id25"/>
+			<label kind="guard" x="-493" y="-187">semaforoCoche[d] == 0 &amp;&amp; 
+t &gt;= tCocheLLegaSemaforoMax</label>
+			<label kind="assignment" x="-493" y="-144">t := 0</label>
+		</transition>
+		<transition id="id31">
+			<source ref="id27"/>
+			<target ref="id28"/>
+			<label kind="guard" x="-331" y="119">t&gt;=tCocheLejosMin</label>
+			<label kind="assignment" x="-331" y="136">t := 0</label>
+		</transition>
+		<transition id="id32">
+			<source ref="id25"/>
+			<target ref="id26"/>
+			<label kind="synchronisation" x="25" y="-246">greenCoche[d]?</label>
+			<label kind="assignment" x="25" y="-221">t:=0 ,
+cochesEnCruce++</label>
+			<nail x="0" y="-161"/>
+			<nail x="102" y="-85"/>
+		</transition>
+		<transition id="id33">
+			<source ref="id26"/>
+			<target ref="id27"/>
+			<label kind="guard" x="102" y="102">t&gt;=tCocheEnCruceMin</label>
+			<label kind="assignment" x="102" y="119">cochesEnCruce--,
+t := 0</label>
+			<nail x="85" y="76"/>
+		</transition>
+	</template>
+	<system>
+// Instanciación
+SemaforoCoche1 = SemaforoCoche(0); // 0 es dirección ascendente, 1 es descendente.
+SemaforoCoche2 = SemaforoCoche(1); 
+Metro1 = Metro();
+Metro2 = Metro();
+Coche1 = Coche(0); // 0 es dirección ascendente, 1 es descendente.
+Coche2 = Coche(1);
+Ambulancia1 = Ambulancia(0);
+
+// Declaración del sistema
+system SemaforoCoche1, SemaforoCoche2, Metro1, Metro2, Coche1, Coche2, Ambulancia1;
+</system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment>El sistema nunca entra en deadlock</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:09 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Coche1.Cruzando</formula>
+			<comment>El Coche1 puede cruzar eventualmente en todas las trazas.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:09 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Coche2.Cruzando</formula>
+			<comment>El Coche2 puede cruzar eventualmente en todas las trazas.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:09 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Metro1.DentroCruce</formula>
+			<comment>El Metro1 puede cruzar eventualmente en todas las trazas.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:09 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Metro2.DentroCruce</formula>
+			<comment>El Metro2 puede cruzar eventualmente en todas las trazas.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:09 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Metro1.Alarma</formula>
+			<comment>Existe alguna traza en la que eventualmente el Metro1 entra en estado de alarma.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 12:14:06 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Metro2.Alarma</formula>
+			<comment>Existe alguna traza en la que eventualmente el Metro1 entra en estado de alarma.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 12:14:08 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Metro1.Alarma --&gt; Metro1.DentroCruce</formula>
+			<comment>Cuando el Metro1 está en estado de Alarma, después en algún momento, cruza.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 12:10:29 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Metro2.Alarma --&gt; Metro2.DentroCruce</formula>
+			<comment>Cuando el Metro2 está en estado de Alarma, después en algún momento, cruza.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 12:10:51 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A&lt;&gt; SemaforoCoche1.Verde and SemaforoCoche2.Verde</formula>
+			<comment>Ambos semáforos pueden estar en verde al mismo tiempo</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:09 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A[] (SemaforoCoche1.Verde imply !SemaforoCoche2.Rojo) &amp;&amp; (SemaforoCoche2.Verde imply !SemaforoCoche1.Rojo)</formula>
+			<comment>Ambos semáforos están sincronizados, es decir, no puede estar uno en verde y otro en rojo. A veces no están ambos verdes o rojos a la vez debido a que hay estados "commited" entre Verde y Rojo.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:10 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Coche1.Llegando --&gt; Coche1.Cruzando </formula>
+			<comment>Cuando el Coche1 está llegando, después en algún momento, cruza.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:15 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Coche1.EsperaPorRojo --&gt; Coche1.Cruzando </formula>
+			<comment>Cuando el Coche1 está en espera por rojo, después en algún momento, cruza.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:18 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Metro1.enLaParada --&gt; Metro1.DentroCruce </formula>
+			<comment>Cuando el Metro1 está en la parada, después en algún momento, cruza.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:21 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Metro1.Alarma --&gt; Metro1.DentroCruce </formula>
+			<comment>Cuando el Metro1 está en alarma, después en algún momento, cruza.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:23 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>SemaforoCoche1.Rojo --&gt; SemaforoCoche1.Verde</formula>
+			<comment>Cuando el SemaforoCoche1 está rojo, después en algún momento se pone verde.</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:29 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A[] !(cochesEnCruce &gt; 0 &amp;&amp; metrosEnCruce &gt; 0)</formula>
+			<comment>En ningún momento hay algún coche y metro en el cruce al mismo tiempo.</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Coche1.Cruzando &amp;&amp; Coche2.Cruzando</formula>
+			<comment>Existe alguna combinacion con dos coches en el cruce a la vez, es posible</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:30 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Metro1.DentroCruce &amp;&amp; Metro2.DentroCruce</formula>
+			<comment>Existe alguna combinacion con dos metros en el cruce a la vez, es posible</comment>
+			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:30 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Pr[&lt;= 90] (&lt;&gt; Coche1.Cruzando)</formula>
+			<comment>Probabilidad de que el Coche1 llegue al estado cruzando en menos de 30 unidades de tiempo</comment>
+			<result outcome="success" type="interval" value="≥ 0.950056 (95% CI)" timestamp="2025-08-05 10:34:30 +0200">
+				<details>≥ 0.950056 (95% CI)</details>
+				<plot title="Probability Density Distribution" xaxis="run duration in time" yaxis="probability density">
+					<series title="density" type="b(1.181678)" color="0x0000ff" encoding="csv">19.228532236475232,0.011753531577768352
+20.410210168507128,0.011753531577768352
+21.591888100539023,0.09402825262214681
+22.77356603257092,0.035260594733305055
+23.955243964602815,0.10578178419991517
+25.13692189663471,0.12928884735545187
+26.318599828666606,0.17630297366652528
+27.500277760698502,0.14104237893322022
+28.681955692730398,0.14104237893322022
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">26.16957006965503,0.0
+26.16957006965503,0.17630297366652528
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.1817, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [19.229, 29.864]
+Mean estimate of displayed sample: 26.17 ± 0.57602 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Density Confidence Intervals" xaxis="run duration in time" yaxis="probability density">
+					<series title="upper limit" type="b(1.181678)" color="0xa0a0ff" encoding="csv">19.228532236475232,0.07497131085391912
+20.410210168507128,0.07497131085391912
+21.591888100539023,0.20724687066674882
+22.77356603257092,0.11697481982594136
+23.955243964602815,0.22407193574325335
+25.13692189663471,0.2569401232482781
+26.318599828666606,0.32022951112937165
+27.500277760698502,0.27303927891193064
+28.681955692730398,0.27303927891193064
+					</series>
+					<series title="lower limit" type="b(1.181678)" color="0x0000ff" encoding="csv">19.228532236475232,3.515744052335976E-4
+20.410210168507128,3.515744052335976E-4
+21.591888100539023,0.04920803927064098
+22.77356603257092,0.008676497316343764
+23.955243964602815,0.05878331705656036
+25.13692189663471,0.07881196318794174
+26.318599828666606,0.12155120290780827
+27.500277760698502,0.08919640600812592
+28.681955692730398,0.08919640600812592
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">26.16957006965503,0.0
+26.16957006965503,0.2709955923258522
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.1817, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [19.229, 29.864]
+Mean estimate of displayed sample: 26.17 ± 0.57602 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="run duration in time" yaxis="probability">
+					<series title="probability" type="b(1.181678)" color="0x0000ff" encoding="csv">19.228532236475232,0.013888888888888888
+20.410210168507128,0.013888888888888888
+21.591888100539023,0.1111111111111111
+22.77356603257092,0.041666666666666664
+23.955243964602815,0.125
+25.13692189663471,0.1527777777777778
+26.318599828666606,0.20833333333333334
+27.500277760698502,0.16666666666666666
+28.681955692730398,0.16666666666666666
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">26.16957006965503,0.0
+26.16957006965503,0.20833333333333334
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.1817, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [19.229, 29.864]
+Mean estimate of displayed sample: 26.17 ± 0.57602 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
+					<series title="upper limit" type="b(1.181678)" color="0xa0a0ff" encoding="csv">19.228532236475232,0.07497131085391912
+20.410210168507128,0.07497131085391912
+21.591888100539023,0.20724687066674882
+22.77356603257092,0.11697481982594136
+23.955243964602815,0.22407193574325335
+25.13692189663471,0.2569401232482781
+26.318599828666606,0.32022951112937165
+27.500277760698502,0.27303927891193064
+28.681955692730398,0.27303927891193064
+					</series>
+					<series title="lower limit" type="b(1.181678)" color="0x0000ff" encoding="csv">19.228532236475232,3.515744052335976E-4
+20.410210168507128,3.515744052335976E-4
+21.591888100539023,0.04920803927064098
+22.77356603257092,0.008676497316343764
+23.955243964602815,0.05878331705656036
+25.13692189663471,0.07881196318794174
+26.318599828666606,0.12155120290780827
+27.500277760698502,0.08919640600812592
+28.681955692730398,0.08919640600812592
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">26.16957006965503,0.0
+26.16957006965503,0.32022951112937165
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.1817, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [19.229, 29.864]
+Mean estimate of displayed sample: 26.17 ± 0.57602 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="run duration in time" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">19.228532236475232,0.0
+20.410210168507128,0.013888888888888888
+21.591888100539023,0.027777777777777776
+22.77356603257092,0.1388888888888889
+23.955243964602815,0.18055555555555555
+25.13692189663471,0.3055555555555556
+26.318599828666606,0.4583333333333333
+27.500277760698502,0.6666666666666666
+28.681955692730398,0.8333333333333334
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">26.16957006965503,0.0
+26.16957006965503,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.1817, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [19.229, 29.864]
+Mean estimate of displayed sample: 26.17 ± 0.57602 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">19.228532236475232,0.04994408370585468
+20.410210168507128,0.07497131085391912
+21.591888100539023,0.09676728911341523
+22.77356603257092,0.24062593250302433
+23.955243964602815,0.2889434084029285
+25.13692189663471,0.4253166533144754
+26.318599828666606,0.5799555909254605
+27.500277760698502,0.773436575511815
+28.681955692730398,0.910803593991874
+					</series>
+					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">19.228532236475232,0.0
+20.410210168507128,3.515744052335976E-4
+21.591888100539023,0.0033819003261732383
+22.77356603257092,0.06866420769681664
+23.955243964602815,0.09979350815289616
+25.13692189663471,0.20237986943006747
+26.318599828666606,0.34024583953703325
+27.500277760698502,0.5457038889744334
+28.681955692730398,0.7269607210880693
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">19.228532236475232,0.0
+20.410210168507128,0.013888888888888888
+21.591888100539023,0.027777777777777776
+22.77356603257092,0.1388888888888889
+23.955243964602815,0.18055555555555555
+25.13692189663471,0.3055555555555556
+26.318599828666606,0.4583333333333333
+27.500277760698502,0.6666666666666666
+28.681955692730398,0.8333333333333334
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">26.16957006965503,0.0
+26.16957006965503,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.1817, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [19.229, 29.864]
+Mean estimate of displayed sample: 26.17 ± 0.57602 (95% CI)</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="run duration in time" yaxis="count">
+					<series title="count" type="b(1.181678)" color="0x0000ff" encoding="csv">19.228532236475232,1.0
+20.410210168507128,1.0
+21.591888100539023,8.0
+22.77356603257092,3.0
+23.955243964602815,9.0
+25.13692189663471,11.0
+26.318599828666606,15.0
+27.500277760698502,12.0
+28.681955692730398,12.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">26.16957006965503,0.0
+26.16957006965503,15.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.1817, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [19.229, 29.864]
+Mean estimate of displayed sample: 26.17 ± 0.57602 (95% CI)</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>Pr[&lt;= 30] (&lt;&gt; Coche2.Cruzando)</formula>
+			<comment>Probabilidad de que el Coche2 llegue al estado cruzando en menos de 30 unidades de tiempo</comment>
+			<result outcome="success" type="interval" value="≥ 0.950056 (95% CI)" timestamp="2025-08-05 10:34:30 +0200">
+				<details>≥ 0.950056 (95% CI)</details>
+				<plot title="Probability Density Distribution" xaxis="run duration in time" yaxis="probability density">
+					<series title="density" type="b(1.305216)" color="0x0000ff" encoding="csv">18.228712239767923,0.010641064927550568
+19.533928304461735,0.021282129855101136
+20.839144369155544,0.0319231947826517
+22.144360433849357,0.07448745449285397
+23.449576498543166,0.1276927791306068
+24.75479256323698,0.15961597391325852
+26.06000862793079,0.11705171420305625
+27.3652246926246,0.10641064927550568
+28.670440757318413,0.11705171420305625
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">25.603862132903345,0.0
+25.603862132903345,0.15961597391325852
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.3052, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [18.229, 29.976]
+Mean estimate of displayed sample: 25.604 ± 0.60169 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Density Confidence Intervals" xaxis="run duration in time" yaxis="probability density">
+					<series title="upper limit" type="b(1.305216)" color="0xa0a0ff" encoding="csv">18.228712239767923,0.07497131085391912
+19.533928304461735,0.09676728911341523
+20.839144369155544,0.11697481982594136
+22.144360433849357,0.19011034044555922
+23.449576498543166,0.27303927891193064
+24.75479256323698,0.32022951112937165
+26.06000862793079,0.2569401232482781
+27.3652246926246,0.24062593250302433
+28.670440757318413,0.2569401232482781
+					</series>
+					<series title="lower limit" type="b(1.305216)" color="0x0000ff" encoding="csv">18.228712239767923,3.515744052335976E-4
+19.533928304461735,0.0033819003261732383
+20.839144369155544,0.008676497316343764
+22.144360433849357,0.039989500933602505
+23.449576498543166,0.08919640600812592
+24.75479256323698,0.12155120290780827
+26.06000862793079,0.07881196318794174
+27.3652246926246,0.06866420769681664
+28.670440757318413,0.07881196318794174
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">25.603862132903345,0.0
+25.603862132903345,0.2453459774144703
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.3052, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [18.229, 29.976]
+Mean estimate of displayed sample: 25.604 ± 0.60169 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="run duration in time" yaxis="probability">
+					<series title="probability" type="b(1.305216)" color="0x0000ff" encoding="csv">18.228712239767923,0.013888888888888888
+19.533928304461735,0.027777777777777776
+20.839144369155544,0.041666666666666664
+22.144360433849357,0.09722222222222222
+23.449576498543166,0.16666666666666666
+24.75479256323698,0.20833333333333334
+26.06000862793079,0.1527777777777778
+27.3652246926246,0.1388888888888889
+28.670440757318413,0.1527777777777778
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">25.603862132903345,0.0
+25.603862132903345,0.20833333333333334
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.3052, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [18.229, 29.976]
+Mean estimate of displayed sample: 25.604 ± 0.60169 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
+					<series title="upper limit" type="b(1.305216)" color="0xa0a0ff" encoding="csv">18.228712239767923,0.07497131085391912
+19.533928304461735,0.09676728911341523
+20.839144369155544,0.11697481982594136
+22.144360433849357,0.19011034044555922
+23.449576498543166,0.27303927891193064
+24.75479256323698,0.32022951112937165
+26.06000862793079,0.2569401232482781
+27.3652246926246,0.24062593250302433
+28.670440757318413,0.2569401232482781
+					</series>
+					<series title="lower limit" type="b(1.305216)" color="0x0000ff" encoding="csv">18.228712239767923,3.515744052335976E-4
+19.533928304461735,0.0033819003261732383
+20.839144369155544,0.008676497316343764
+22.144360433849357,0.039989500933602505
+23.449576498543166,0.08919640600812592
+24.75479256323698,0.12155120290780827
+26.06000862793079,0.07881196318794174
+27.3652246926246,0.06866420769681664
+28.670440757318413,0.07881196318794174
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">25.603862132903345,0.0
+25.603862132903345,0.32022951112937165
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.3052, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [18.229, 29.976]
+Mean estimate of displayed sample: 25.604 ± 0.60169 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="run duration in time" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">18.228712239767923,0.0
+19.533928304461735,0.013888888888888888
+20.839144369155544,0.041666666666666664
+22.144360433849357,0.08333333333333333
+23.449576498543166,0.18055555555555555
+24.75479256323698,0.3472222222222222
+26.06000862793079,0.5555555555555556
+27.3652246926246,0.7083333333333334
+28.670440757318413,0.8472222222222222
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">25.603862132903345,0.0
+25.603862132903345,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.3052, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [18.229, 29.976]
+Mean estimate of displayed sample: 25.604 ± 0.60169 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">18.228712239767923,0.04994408370585468
+19.533928304461735,0.07497131085391912
+20.839144369155544,0.11697481982594136
+22.144360433849357,0.172608584683674
+23.449576498543166,0.2889434084029285
+24.75479256323698,0.46863283128129885
+26.06000862793079,0.6727507843650051
+27.3652246926246,0.8095467017599333
+28.670440757318413,0.9211880368120583
+					</series>
+					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">18.228712239767923,0.0
+19.533928304461735,3.515744052335976E-4
+20.839144369155544,0.008676497316343764
+22.144360433849357,0.031197509141384482
+23.449576498543166,0.09979350815289616
+24.75479256323698,0.238812769405364
+26.06000862793079,0.43364644548663583
+27.3652246926246,0.5893328452455981
+28.670440757318413,0.7430598767517219
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">18.228712239767923,0.0
+19.533928304461735,0.013888888888888888
+20.839144369155544,0.041666666666666664
+22.144360433849357,0.08333333333333333
+23.449576498543166,0.18055555555555555
+24.75479256323698,0.3472222222222222
+26.06000862793079,0.5555555555555556
+27.3652246926246,0.7083333333333334
+28.670440757318413,0.8472222222222222
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">25.603862132903345,0.0
+25.603862132903345,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.3052, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [18.229, 29.976]
+Mean estimate of displayed sample: 25.604 ± 0.60169 (95% CI)</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="run duration in time" yaxis="count">
+					<series title="count" type="b(1.305216)" color="0x0000ff" encoding="csv">18.228712239767923,1.0
+19.533928304461735,2.0
+20.839144369155544,3.0
+22.144360433849357,7.0
+23.449576498543166,12.0
+24.75479256323698,15.0
+26.06000862793079,11.0
+27.3652246926246,10.0
+28.670440757318413,11.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">25.603862132903345,0.0
+25.603862132903345,15.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1.3052, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [18.229, 29.976]
+Mean estimate of displayed sample: 25.604 ± 0.60169 (95% CI)</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>Pr[&lt;= 1000] (&lt;&gt; Metro1.Alarma)</formula>
+			<comment>Probabilidad de que el Metro1 llegue al estado de alarma en 1000 unidades de tiempo</comment>
+			<result outcome="success" type="interval" value="≤ 0.0499441 (95% CI)" timestamp="2025-08-05 12:13:59 +0200">
+				<details>≤ 0.0499441 (95% CI)</details>
+			</result>
+		</query>
+		<query>
+			<formula>Pr[&lt;= 1000] (&lt;&gt; Metro2.Alarma)</formula>
+			<comment>Probabilidad de que el Metro2 llegue al estado de alarma en 1000 unidades de tiempo</comment>
+			<result outcome="success" type="interval" value="≤ 0.0499441 (95% CI)" timestamp="2025-08-05 12:14:02 +0200">
+				<details>≤ 0.0499441 (95% CI)</details>
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment>-------------------------------------------------------------------------</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;= 10] (&lt;&gt; Ambulancia1.Cruzando)</formula>
+			<comment/>
+			<result outcome="success" type="interval" value="≥ 0.950056 (95% CI)" timestamp="2025-09-07 21:29:29 +0200">
+				<details>≥ 0.950056 (95% CI)</details>
+				<plot title="Probability Density Distribution" xaxis="run duration in time" yaxis="probability density">
+					<series title="density" type="b(0.760004)" color="0x0000ff" encoding="csv">3.0784938614815474,0.2192972015869429
+3.8384974796790634,0.14619813439129528
+4.5985010978765795,0.05482430039673573
+5.358504716074096,0.1644729011902072
+6.118508334271612,0.10964860079347145
+6.878511952469127,0.1644729011902072
+7.638515570666644,0.10964860079347145
+8.39851918886416,0.09137383399455955
+9.158522807061676,0.25584673518476675
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">6.5453791805258446,0.0
+6.5453791805258446,0.25584673518476675
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.76, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [3.078, 9.919]
+Mean estimate of displayed sample: 6.545 ± 0.5175 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Density Confidence Intervals" xaxis="run duration in time" yaxis="probability density">
+					<series title="upper limit" type="b(0.760004)" color="0xa0a0ff" encoding="csv">3.0784938614815474,0.27303927891193064
+3.8384974796790634,0.20724687066674882
+4.5985010978765795,0.11697481982594136
+5.358504716074096,0.22407193574325335
+6.118508334271612,0.172608584683674
+6.878511952469127,0.22407193574325335
+7.638515570666644,0.172608584683674
+8.39851918886416,0.15466731481612306
+9.158522807061676,0.30466893329868333
+					</series>
+					<series title="lower limit" type="b(0.760004)" color="0x0000ff" encoding="csv">3.0784938614815474,0.08919640600812592
+3.8384974796790634,0.04920803927064098
+4.5985010978765795,0.008676497316343764
+5.358504716074096,0.05878331705656036
+6.118508334271612,0.031197509141384482
+6.878511952469127,0.05878331705656036
+7.638515570666644,0.031197509141384482
+8.39851918886416,0.022931659153745478
+9.158522807061676,0.1105837866784895
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">6.5453791805258446,0.0
+6.5453791805258446,0.40087826689728134
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.76, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [3.078, 9.919]
+Mean estimate of displayed sample: 6.545 ± 0.5175 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="run duration in time" yaxis="probability">
+					<series title="probability" type="b(0.760004)" color="0x0000ff" encoding="csv">3.0784938614815474,0.16666666666666666
+3.8384974796790634,0.1111111111111111
+4.5985010978765795,0.041666666666666664
+5.358504716074096,0.125
+6.118508334271612,0.08333333333333333
+6.878511952469127,0.125
+7.638515570666644,0.08333333333333333
+8.39851918886416,0.06944444444444445
+9.158522807061676,0.19444444444444445
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">6.5453791805258446,0.0
+6.5453791805258446,0.19444444444444445
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.76, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [3.078, 9.919]
+Mean estimate of displayed sample: 6.545 ± 0.5175 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
+					<series title="upper limit" type="b(0.760004)" color="0xa0a0ff" encoding="csv">3.0784938614815474,0.27303927891193064
+3.8384974796790634,0.20724687066674882
+4.5985010978765795,0.11697481982594136
+5.358504716074096,0.22407193574325335
+6.118508334271612,0.172608584683674
+6.878511952469127,0.22407193574325335
+7.638515570666644,0.172608584683674
+8.39851918886416,0.15466731481612306
+9.158522807061676,0.30466893329868333
+					</series>
+					<series title="lower limit" type="b(0.760004)" color="0x0000ff" encoding="csv">3.0784938614815474,0.08919640600812592
+3.8384974796790634,0.04920803927064098
+4.5985010978765795,0.008676497316343764
+5.358504716074096,0.05878331705656036
+6.118508334271612,0.031197509141384482
+6.878511952469127,0.05878331705656036
+7.638515570666644,0.031197509141384482
+8.39851918886416,0.022931659153745478
+9.158522807061676,0.1105837866784895
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">6.5453791805258446,0.0
+6.5453791805258446,0.30466893329868333
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.76, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [3.078, 9.919]
+Mean estimate of displayed sample: 6.545 ± 0.5175 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="run duration in time" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">3.0784938614815474,0.0
+3.8384974796790634,0.16666666666666666
+4.5985010978765795,0.2777777777777778
+5.358504716074096,0.3194444444444444
+6.118508334271612,0.4444444444444444
+6.878511952469127,0.5277777777777778
+7.638515570666644,0.6527777777777778
+8.39851918886416,0.7361111111111112
+9.158522807061676,0.8055555555555556
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">6.5453791805258446,0.0
+6.5453791805258446,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.76, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [3.078, 9.919]
+Mean estimate of displayed sample: 6.545 ± 0.5175 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">3.0784938614815474,0.04994408370585468
+3.8384974796790634,0.27303927891193064
+4.5985010978765795,0.39590581823203597
+5.358504716074096,0.439858436528534
+6.118508334271612,0.5663535545133641
+6.878511952469127,0.6466702759433286
+7.638515570666644,0.761187230594636
+8.39851918886416,0.8330460439665763
+9.158522807061676,0.8894162133215106
+					</series>
+					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">3.0784938614815474,0.0
+3.8384974796790634,0.08919640600812592
+4.5985010978765795,0.17864288115227986
+5.358504716074096,0.21441793608731277
+6.118508334271612,0.32724921563499487
+6.878511952469127,0.4065290765256738
+7.638515570666644,0.5313671687187012
+8.39851918886416,0.6189720732283238
+9.158522807061676,0.6953310667013166
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">3.0784938614815474,0.0
+3.8384974796790634,0.16666666666666666
+4.5985010978765795,0.2777777777777778
+5.358504716074096,0.3194444444444444
+6.118508334271612,0.4444444444444444
+6.878511952469127,0.5277777777777778
+7.638515570666644,0.6527777777777778
+8.39851918886416,0.7361111111111112
+9.158522807061676,0.8055555555555556
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">6.5453791805258446,0.0
+6.5453791805258446,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.76, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [3.078, 9.919]
+Mean estimate of displayed sample: 6.545 ± 0.5175 (95% CI)</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="run duration in time" yaxis="count">
+					<series title="count" type="b(0.760004)" color="0x0000ff" encoding="csv">3.0784938614815474,12.0
+3.8384974796790634,8.0
+4.5985010978765795,3.0
+5.358504716074096,9.0
+6.118508334271612,6.0
+6.878511952469127,9.0
+7.638515570666644,6.0
+8.39851918886416,5.0
+9.158522807061676,14.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">6.5453791805258446,0.0
+6.5453791805258446,14.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.76, bucket count=9
+Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [3.078, 9.919]
+Mean estimate of displayed sample: 6.545 ± 0.5175 (95% CI)</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>A[] !(ambulanciaEnCruce &gt; 0 &amp;&amp; metrosEnCruce &gt; 0)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment>-------------------------------------------------------------------------</comment>
+		</query>
+	</queries>
+</nta>

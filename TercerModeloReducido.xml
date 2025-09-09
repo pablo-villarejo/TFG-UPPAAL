@@ -42,74 +42,90 @@ int ambulanciaEnCruce = 0;</declaration>
 	<template>
 		<name>Ambulancia</name>
 		<parameter>int[0,1] d</parameter>
-		<declaration>clock t;</declaration>
-		<location id="id0" x="-399" y="-161">
-			<name x="-399" y="-212">Llegando</name>
-			<label kind="invariant" x="-459" y="-195">t &lt;= tAmbLLegaSemaforoMax</label>
+		<declaration>clock t;
+
+clock tEsperando;</declaration>
+		<location id="id0" x="-407" y="-68">
+			<name x="-493" y="-119">Llegando</name>
+			<label kind="invariant" x="-620" y="-102">t &lt;= tAmbLLegaSemaforoMax</label>
 		</location>
-		<location id="id1" x="408" y="-161">
-			<name x="399" y="-229">Cruzando</name>
-			<label kind="invariant" x="399" y="-204">t &lt;= tAmbEnCruceMax</label>
+		<location id="id1" x="400" y="-68">
+			<name x="391" y="-136">Cruzando</name>
+			<label kind="invariant" x="391" y="-111">t &lt;= tAmbEnCruceMax</label>
 		</location>
-		<location id="id2" x="0" y="119">
-			<name x="-34" y="136">HaCruzado</name>
-			<label kind="invariant" x="-43" y="153">t &lt;= tAmbLejosMax</label>
+		<location id="id2" x="-34" y="195">
+			<name x="-68" y="212">HaCruzado</name>
+			<label kind="invariant" x="-77" y="229">t &lt;= tAmbLejosMax</label>
+		</location>
+		<location id="id3" x="-34" y="-297">
+			<name x="-44" y="-331">CruceOcupado</name>
 		</location>
 		<init ref="id0"/>
-		<transition id="id3">
-			<source ref="id0"/>
-			<target ref="id0"/>
-			<label kind="guard" x="-518" y="-59">metrosEnCruce != 0 &amp;&amp;
-t &gt;= 1</label>
-			<label kind="assignment" x="-544" y="-17">t := tAmbLLegaSemaforoMin</label>
-			<nail x="-399" y="-68"/>
-			<nail x="-484" y="-68"/>
-		</transition>
 		<transition id="id4">
-			<source ref="id2"/>
-			<target ref="id0"/>
-			<label kind="guard" x="-289" y="25">t &gt;= tAmbLejosMin</label>
-			<label kind="assignment" x="-238" y="42">t := 0</label>
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="guard" x="127" y="-314">metrosEnCruce == 1</label>
+			<label kind="synchronisation" x="127" y="-297">metroSaliendo?</label>
+			<label kind="assignment" x="127" y="-280">t := 0,
+ambulanciaEnCruce++</label>
+			<label kind="comments" x="306" y="-323">La guarda es:
+metrosEnCruce == 1
+En vez de 0, porque ese último metro es 
+el que manda la señal de metroSaliendo</label>
 		</transition>
 		<transition id="id5">
-			<source ref="id1"/>
-			<target ref="id2"/>
-			<label kind="guard" x="255" y="34">t &gt;= tAmbEnCruceMin</label>
-			<label kind="assignment" x="255" y="59">t := 0,
-ambulanciaEnCruce--</label>
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-408" y="-263">t &gt;= tAmbLLegaSemaforoMax &amp;&amp; 
+metrosEnCruce != 0</label>
+			<label kind="assignment" x="-408" y="-221">t := 0,
+tEsperando := 0</label>
 		</transition>
 		<transition id="id6">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-297" y="118">t &gt;= tAmbLejosMin</label>
+			<label kind="assignment" x="-246" y="135">t := 0</label>
+		</transition>
+		<transition id="id7">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="247" y="127">t &gt;= tAmbEnCruceMin</label>
+			<label kind="assignment" x="247" y="152">t := 0,
+ambulanciaEnCruce--</label>
+		</transition>
+		<transition id="id8">
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-136" y="-255">t &gt;= tAmbLLegaSemaforoMin &amp;&amp; 
+			<label kind="guard" x="-144" y="-162">t &gt;= tAmbLLegaSemaforoMin &amp;&amp; 
 metrosEnCruce == 0</label>
-			<label kind="assignment" x="-136" y="-204">t := 0,
+			<label kind="assignment" x="-144" y="-111">t := 0,
 ambulanciaEnCruce++</label>
 		</transition>
 	</template>
 	<template>
 		<name>Metro</name>
 		<declaration>clock t;</declaration>
-		<location id="id7" x="425" y="-8">
+		<location id="id9" x="425" y="-8">
 			<name x="434" y="-42">FueraCruce</name>
 			<label kind="invariant" x="441" y="-17">t &lt;= tMetroLejosMax</label>
 		</location>
-		<location id="id8" x="-306" y="94">
+		<location id="id10" x="-306" y="94">
 			<name x="-391" y="42">DentroCruce</name>
 			<label kind="invariant" x="-476" y="59">t &lt;= tMetroEnCruceMax</label>
 		</location>
-		<location id="id9" x="212" y="221">
+		<location id="id11" x="212" y="221">
 			<name x="202" y="187">enLaParada</name>
 			<label kind="invariant" x="161" y="238">t&lt;= tParadaMax</label>
 		</location>
-		<location id="id10" x="-161" y="264">
+		<location id="id12" x="-161" y="264">
 			<name x="-170" y="229">Alarma</name>
 			<label kind="invariant" x="-170" y="212">t &lt;= 5</label>
 		</location>
-		<init ref="id9"/>
-		<transition id="id11">
-			<source ref="id10"/>
-			<target ref="id10"/>
+		<init ref="id11"/>
+		<transition id="id13">
+			<source ref="id12"/>
+			<target ref="id12"/>
 			<label kind="guard" x="-195" y="374">t == 5 &amp;&amp;
 (cochesEnCruce != 0 ||
 ambulanciaEnCruce != 0)</label>
@@ -117,9 +133,9 @@ ambulanciaEnCruce != 0)</label>
 			<nail x="-111" y="357"/>
 			<nail x="-213" y="357"/>
 		</transition>
-		<transition id="id12">
-			<source ref="id10"/>
-			<target ref="id8"/>
+		<transition id="id14">
+			<source ref="id12"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-433" y="212">ambulanciaEnCruce == 0 &amp;&amp;
 cochesEnCruce == 0 &amp;&amp;
 t &gt;= 0</label>
@@ -127,17 +143,17 @@ t &gt;= 0</label>
 metrosEnCruce++,
 metrosEnParada--</label>
 		</transition>
-		<transition id="id13">
-			<source ref="id9"/>
-			<target ref="id10"/>
+		<transition id="id15">
+			<source ref="id11"/>
+			<target ref="id12"/>
 			<label kind="guard" x="-59" y="263">(ambulanciaEnCruce != 0 ||
 cochesEnCruce != 0) &amp;&amp;
 t &gt;= tParadaMax</label>
 			<label kind="assignment" x="-59" y="323">t := 0</label>
 		</transition>
-		<transition id="id14">
-			<source ref="id9"/>
-			<target ref="id8"/>
+		<transition id="id16">
+			<source ref="id11"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-8" y="51">ambulanciaEnCruce == 0 &amp;&amp;
 cochesEnCruce == 0 &amp;&amp;
 t &gt;= tParadaMin</label>
@@ -145,18 +161,18 @@ t &gt;= tParadaMin</label>
 metrosEnCruce++,
 metrosEnParada--</label>
 		</transition>
-		<transition id="id15">
-			<source ref="id7"/>
-			<target ref="id9"/>
+		<transition id="id17">
+			<source ref="id9"/>
+			<target ref="id11"/>
 			<label kind="guard" x="441" y="110">t &gt;= tMetroLejosMin</label>
 			<label kind="synchronisation" x="441" y="136">metroAproximando!</label>
 			<label kind="assignment" x="441" y="161">t := 0,
 metrosEnParada++</label>
 			<nail x="416" y="204"/>
 		</transition>
-		<transition id="id16">
-			<source ref="id8"/>
-			<target ref="id7"/>
+		<transition id="id18">
+			<source ref="id10"/>
+			<target ref="id9"/>
 			<label kind="guard" x="-144" y="-76">t &gt;= tMetroEnCruceMin</label>
 			<label kind="synchronisation" x="-145" y="-59">metroSaliendo!</label>
 			<label kind="assignment" x="-145" y="-42">t := 0, 
@@ -168,22 +184,19 @@ metrosEnCruce--</label>
 		<name>SemaforoCoche</name>
 		<parameter>int[0,1] d</parameter>
 		<declaration>clock t;</declaration>
-		<location id="id17" x="331" y="-153">
+		<location id="id19" x="331" y="-153">
 			<name x="340" y="-178">Rojo</name>
 		</location>
-		<location id="id18" x="-34" y="-51">
-			<name x="-93" y="-76">Verde</name>
+		<location id="id20" x="-51" y="-119">
+			<name x="-110" y="-144">Verde</name>
 		</location>
-		<location id="id19" x="85" y="-161">
+		<location id="id21" x="213" y="-51">
 			<committed/>
 		</location>
-		<location id="id20" x="213" y="-51">
-			<committed/>
-		</location>
-		<init ref="id17"/>
-		<transition id="id21">
-			<source ref="id17"/>
-			<target ref="id20"/>
+		<init ref="id19"/>
+		<transition id="id22">
+			<source ref="id19"/>
+			<target ref="id21"/>
 			<label kind="guard" x="289" y="-119">metrosEnCruce == 1 &amp;&amp;
 metrosEnParada == 0</label>
 			<label kind="synchronisation" x="289" y="-85">metroSaliendo?</label>
@@ -192,31 +205,27 @@ metrosEnCruce == 1
 En vez de 0, porque ese último metro es 
 el que manda la señal de metroSaliendo?</label>
 		</transition>
-		<transition id="id22">
-			<source ref="id18"/>
-			<target ref="id19"/>
-			<label kind="synchronisation" x="-110" y="-136">metroAproximando?</label>
-		</transition>
 		<transition id="id23">
 			<source ref="id20"/>
-			<target ref="id18"/>
-			<label kind="synchronisation" x="102" y="17">greenCoche[d]!</label>
-			<label kind="assignment" x="102" y="-9">semaforoCoche[d] = 1</label>
-			<nail x="196" y="-34"/>
-			<nail x="153" y="-34"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="8" y="-195">metroAproximando?</label>
+			<label kind="assignment" x="-8" y="-170">semaforoCoche[d] = 0</label>
 		</transition>
 		<transition id="id24">
-			<source ref="id19"/>
-			<target ref="id17"/>
-			<label kind="synchronisation" x="170" y="-238">redCoche[d]!</label>
-			<label kind="assignment" x="170" y="-221">semaforoCoche[d] = 0</label>
-			<nail x="119" y="-178"/>
+			<source ref="id21"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="-17" y="1">greenCoche[d]!</label>
+			<label kind="assignment" x="-17" y="-25">semaforoCoche[d] = 1</label>
+			<nail x="196" y="-34"/>
+			<nail x="153" y="-34"/>
 		</transition>
 	</template>
 	<template>
 		<name>Coche</name>
 		<parameter>int[0,1] d</parameter>
-		<declaration>clock t;</declaration>
+		<declaration>clock t;
+
+int vueltas = 0;</declaration>
 		<location id="id25" x="-119" y="-238">
 			<name x="-178" y="-280">EsperaPorRojo</name>
 		</location>
@@ -232,30 +241,41 @@ el que manda la señal de metroSaliendo?</label>
 			<name x="-519" y="-8">Llegando</name>
 			<label kind="invariant" x="-654" y="17">t &lt;= tCocheLLegaSemaforoMax</label>
 		</location>
+		<location id="id29" x="-646" y="-127">
+			<name x="-656" y="-161">Fin</name>
+		</location>
 		<init ref="id28"/>
-		<transition id="id29">
+		<transition id="id30">
+			<source ref="id28"/>
+			<target ref="id29"/>
+			<label kind="guard" x="-680" y="-85">vueltas == 2</label>
+		</transition>
+		<transition id="id31">
 			<source ref="id28"/>
 			<target ref="id26"/>
-			<label kind="guard" x="-195" y="-93">semaforoCoche[d] == 1 &amp;&amp; 
-t &gt;= tCocheLLegaSemaforoMin</label>
+			<label kind="guard" x="-195" y="-119">semaforoCoche[d] == 1 &amp;&amp; 
+t &gt;= tCocheLLegaSemaforoMin &amp;&amp;
+vueltas != 2</label>
 			<label kind="assignment" x="-195" y="-50">t:=0,
 cochesEnCruce++</label>
 			<nail x="-59" y="0"/>
 		</transition>
-		<transition id="id30">
+		<transition id="id32">
 			<source ref="id28"/>
 			<target ref="id25"/>
 			<label kind="guard" x="-493" y="-187">semaforoCoche[d] == 0 &amp;&amp; 
-t &gt;= tCocheLLegaSemaforoMax</label>
-			<label kind="assignment" x="-493" y="-144">t := 0</label>
+t &gt;= tCocheLLegaSemaforoMax &amp;&amp;
+vueltas != 2</label>
+			<label kind="assignment" x="-493" y="-119">t := 0</label>
 		</transition>
-		<transition id="id31">
+		<transition id="id33">
 			<source ref="id27"/>
 			<target ref="id28"/>
 			<label kind="guard" x="-331" y="119">t&gt;=tCocheLejosMin</label>
-			<label kind="assignment" x="-331" y="136">t := 0</label>
+			<label kind="assignment" x="-331" y="136">t := 0,
+vueltas++</label>
 		</transition>
-		<transition id="id32">
+		<transition id="id34">
 			<source ref="id25"/>
 			<target ref="id26"/>
 			<label kind="synchronisation" x="25" y="-246">greenCoche[d]?</label>
@@ -264,7 +284,7 @@ cochesEnCruce++</label>
 			<nail x="0" y="-161"/>
 			<nail x="102" y="-85"/>
 		</transition>
-		<transition id="id33">
+		<transition id="id35">
 			<source ref="id26"/>
 			<target ref="id27"/>
 			<label kind="guard" x="102" y="102">t&gt;=tCocheEnCruceMin</label>
@@ -290,7 +310,7 @@ system SemaforoCoche1, SemaforoCoche2, Metro1, Metro2, Coche1, Coche2, Ambulanci
 		<query>
 			<formula>A[] not deadlock</formula>
 			<comment>El sistema nunca entra en deadlock</comment>
-			<result outcome="success" type="quality" timestamp="2025-08-05 10:34:09 +0200">
+			<result outcome="success" type="quality" timestamp="2025-09-09 00:44:11 +0200">
 			</result>
 		</query>
 		<query>
@@ -960,6 +980,154 @@ Mean estimate of displayed sample: 6.545 ± 0.5175 (95% CI)</comment>
 		<query>
 			<formula>A[] !(ambulanciaEnCruce &gt; 0 &amp;&amp; metrosEnCruce &gt; 0)</formula>
 			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-09-08 15:25:04 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Ambulancia1.Llegando --&gt; Ambulancia1.Cruzando
+</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-09-08 15:35:23 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Ambulancia1.CruceOcupado --&gt; Ambulancia1.Cruzando</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-09-08 18:04:48 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (ambulanciaEnCruce &gt; 0 &amp;&amp; cochesEnCruce &gt; 0)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-09-08 18:07:57 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (Ambulancia1.Cruzando &amp;&amp; SemaforoCoche1.Rojo)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-09-08 18:09:35 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (Ambulancia1.Cruzando &amp;&amp; Metro1.Alarma)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-09-08 18:17:40 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Pr[&lt;=1000] ( &lt;&gt; (Ambulancia1.CruceOcupado and Ambulancia1.tEsperando &gt;= 2))
+</formula>
+			<comment>La probabilidad de que, en algún momento dentro de las primeras 1000 unidades de tiempo, la ambulancia esté en el estado CruceOcupado habiendo acumulado al menos 2 unidades de tiempo en dicho estado.</comment>
+			<result outcome="success" type="quantity" value="0.0679872 ± 0.0407395 (95% CI)" timestamp="2025-09-08 18:15:32 +0200">
+				<details>0.0679872 ± 0.0407395 (95% CI)</details>
+				<plot title="Probability Density Distribution" xaxis="run duration in time" yaxis="probability density">
+					<series title="density" type="b(151.208741)" color="0x0000ff" encoding="csv">519.9300608814076,1.7289867437514025E-4
+671.1388017474521,4.3224668593785064E-5
+822.3475426134967,1.7289867437514025E-4
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">731.9193502794282,0.0
+731.9193502794282,1.7289867437514025E-4
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=151.21, bucket count=3
+Runs: 153 in total, 9 (5.8824%) displayed, 144 (94.118%) remaining
+Span of displayed sample: [519.9, 973.6]
+Mean estimate of displayed sample: 731.9 ± 160.2 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Density Confidence Intervals" xaxis="run duration in time" yaxis="probability density">
+					<series title="upper limit" type="b(151.208741)" color="0xa0a0ff" encoding="csv">519.9300608814076,0.06558362660440464
+671.1388017474521,0.03587654535465321
+822.3475426134967,0.06558362660440464
+					</series>
+					<series title="lower limit" type="b(151.208741)" color="0x0000ff" encoding="csv">519.9300608814076,0.0071682540799909555
+671.1388017474521,1.6546217880187777E-4
+822.3475426134967,0.0071682540799909555
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">731.9193502794282,0.0
+731.9193502794282,4.337290703485522E-4
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=151.21, bucket count=3
+Runs: 153 in total, 9 (5.8824%) displayed, 144 (94.118%) remaining
+Span of displayed sample: [519.9, 973.6]
+Mean estimate of displayed sample: 731.9 ± 160.2 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="run duration in time" yaxis="probability">
+					<series title="probability" type="b(151.208741)" color="0x0000ff" encoding="csv">519.9300608814076,0.026143790849673203
+671.1388017474521,0.006535947712418301
+822.3475426134967,0.026143790849673203
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">731.9193502794282,0.0
+731.9193502794282,0.026143790849673203
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=151.21, bucket count=3
+Runs: 153 in total, 9 (5.8824%) displayed, 144 (94.118%) remaining
+Span of displayed sample: [519.9, 973.6]
+Mean estimate of displayed sample: 731.9 ± 160.2 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
+					<series title="upper limit" type="b(151.208741)" color="0xa0a0ff" encoding="csv">519.9300608814076,0.06558362660440464
+671.1388017474521,0.03587654535465321
+822.3475426134967,0.06558362660440464
+					</series>
+					<series title="lower limit" type="b(151.208741)" color="0x0000ff" encoding="csv">519.9300608814076,0.0071682540799909555
+671.1388017474521,1.6546217880187777E-4
+822.3475426134967,0.0071682540799909555
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">731.9193502794282,0.0
+731.9193502794282,0.06558362660440464
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=151.21, bucket count=3
+Runs: 153 in total, 9 (5.8824%) displayed, 144 (94.118%) remaining
+Span of displayed sample: [519.9, 973.6]
+Mean estimate of displayed sample: 731.9 ± 160.2 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="run duration in time" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">519.9300608814076,0.0
+671.1388017474521,0.026143790849673203
+822.3475426134967,0.032679738562091505
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">731.9193502794282,0.0
+731.9193502794282,0.05882352941176472
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=151.21, bucket count=3
+Runs: 153 in total, 9 (5.8824%) displayed, 144 (94.118%) remaining
+Span of displayed sample: [519.9, 973.6]
+Mean estimate of displayed sample: 731.9 ± 160.2 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">519.9300608814076,0.023821991293435523
+671.1388017474521,0.06558362660440464
+822.3475426134967,0.07461347309519972
+					</series>
+					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">519.9300608814076,0.0
+671.1388017474521,0.0071682540799909555
+822.3475426134967,0.010694566788078275
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">519.9300608814076,0.0
+671.1388017474521,0.026143790849673203
+822.3475426134967,0.032679738562091505
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">731.9193502794282,0.0
+731.9193502794282,0.05882352941176472
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=151.21, bucket count=3
+Runs: 153 in total, 9 (5.8824%) displayed, 144 (94.118%) remaining
+Span of displayed sample: [519.9, 973.6]
+Mean estimate of displayed sample: 731.9 ± 160.2 (95% CI)</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="run duration in time" yaxis="count">
+					<series title="count" type="b(151.208741)" color="0x0000ff" encoding="csv">519.9300608814076,4.0
+671.1388017474521,1.0
+822.3475426134967,4.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">731.9193502794282,0.0
+731.9193502794282,4.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=151.21, bucket count=3
+Runs: 153 in total, 9 (5.8824%) displayed, 144 (94.118%) remaining
+Span of displayed sample: [519.9, 973.6]
+Mean estimate of displayed sample: 731.9 ± 160.2 (95% CI)</comment>
+				</plot>
+			</result>
 		</query>
 		<query>
 			<formula/>

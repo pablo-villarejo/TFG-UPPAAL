@@ -74,15 +74,18 @@ const int tAmbEnCruceSupMin = 3;
 const int tAmbHaCruzadoSupMax = 500; // Estos tiempos altos, ya que las ambulancias no son tan comunes como los coches
 const int tAmbHaCruzadoSupMin = 200;
 
+int ambulanciaEnCruce = 0;
 
 </declaration>
 	<template>
 		<name>Ambulancia</name>
 		<parameter>int[0,1] d</parameter>
-		<declaration>clock t;</declaration>
+		<declaration>clock t;
+
+clock tEsperando;</declaration>
 		<location id="id0" x="-875" y="-340">
-			<name x="-892" y="-382">LlegandoSup</name>
-			<label kind="invariant" x="-884" y="-399">t &lt;= tAmbLLegaSemaforoSupMax</label>
+			<name x="-1147" y="-357">LlegandoSup</name>
+			<label kind="invariant" x="-1139" y="-374">t &lt;= tAmbLLegaSemaforoSupMax</label>
 		</location>
 		<location id="id1" x="-399" y="-340">
 			<name x="-442" y="-382">CruzandoSup</name>
@@ -104,106 +107,120 @@ const int tAmbHaCruzadoSupMin = 200;
 			<name x="-977" y="-59">HaCruzadoInf</name>
 			<label kind="invariant" x="-1003" y="-34">t &lt;= tAmbHaCruzadoInfMax</label>
 		</location>
+		<location id="id6" x="-680" y="-493">
+			<name x="-714" y="-544">CruceOcupado</name>
+		</location>
 		<init ref="id3"/>
-		<transition id="id6">
-			<source ref="id0"/>
-			<target ref="id0"/>
-			<label kind="guard" x="-1088" y="-467">metrosEnCruce != 0</label>
-			<label kind="assignment" x="-1088" y="-442">t := tAmbLLegaSemaforoSupMin</label>
-			<label kind="comments" x="-1215" y="-535">Actualiza el reloj a tAmbLLegaSemaforoSupMin para que 
-pueda optar a cruzar desde primer momento, 
-sin volver a esperar a que pase ese tiempo.</label>
-			<nail x="-994" y="-331"/>
-			<nail x="-994" y="-416"/>
-		</transition>
 		<transition id="id7">
+			<source ref="id6"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-595" y="-518">metrosEnCruce == 1</label>
+			<label kind="synchronisation" x="-595" y="-501">metroSaliendo?</label>
+			<label kind="assignment" x="-595" y="-484">t := 0,
+ambulanciaEnCruce++</label>
+			<label kind="comments" x="-425" y="-535">La guarda es:
+metrosEnCruce == 1
+En vez de 0, porque ese último metro es 
+el que manda la señal de metroSaliendo</label>
+		</transition>
+		<transition id="id8">
+			<source ref="id0"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-986" y="-484">t &gt;= tAmbLLegaSemaforoSupMax &amp;&amp; 
+metrosEnCruce != 0</label>
+			<label kind="assignment" x="-986" y="-450">t := 0,
+tEsperando := 0</label>
+		</transition>
+		<transition id="id9">
 			<source ref="id5"/>
 			<target ref="id0"/>
 			<label kind="guard" x="-1096" y="-229">t &gt;= tAmbHaCruzadoInfMin</label>
 			<label kind="assignment" x="-952" y="-204">t := 0</label>
 		</transition>
-		<transition id="id8">
+		<transition id="id10">
 			<source ref="id4"/>
 			<target ref="id5"/>
 			<label kind="guard" x="-756" y="-68">t &gt;= tAmbEnCruceInfMin</label>
 			<label kind="assignment" x="-688" y="-34">t := 0</label>
 		</transition>
-		<transition id="id9">
+		<transition id="id11">
 			<source ref="id3"/>
 			<target ref="id4"/>
 			<label kind="guard" x="-255" y="-59">t &gt;= tAmbLLegaSemaforoInfMin</label>
 			<label kind="assignment" x="-153" y="-33">t := 0</label>
 		</transition>
-		<transition id="id10">
+		<transition id="id12">
 			<source ref="id2"/>
 			<target ref="id3"/>
 			<label kind="guard" x="68" y="-238">t &gt;= tAmbHaCruzadoSupMin</label>
 			<label kind="assignment" x="85" y="-212">t := 0</label>
 		</transition>
-		<transition id="id11">
+		<transition id="id13">
 			<source ref="id1"/>
 			<target ref="id2"/>
 			<label kind="guard" x="-272" y="-331">t &gt;= tAmbEnCruceSupMin</label>
-			<label kind="assignment" x="-212" y="-306">t := 0</label>
+			<label kind="assignment" x="-212" y="-306">t := 0,
+ambulanciaEnCruce--</label>
 		</transition>
-		<transition id="id12">
+		<transition id="id14">
 			<source ref="id0"/>
 			<target ref="id1"/>
 			<label kind="guard" x="-739" y="-331">metrosEnCruce == 0 &amp;&amp;
 t &gt;= tAmbLLegaSemaforoSupMin</label>
-			<label kind="assignment" x="-688" y="-289">t := 0</label>
+			<label kind="assignment" x="-688" y="-289">t := 0,
+ambulanciaEnCruce++</label>
 		</transition>
 	</template>
 	<template>
 		<name>CocheInferiorLouisPasteur</name>
 		<declaration>clock t;</declaration>
-		<location id="id13" x="-671" y="17">
+		<location id="id15" x="-671" y="17">
 			<name x="-764" y="8">Llegando</name>
 			<label kind="invariant" x="-926" y="59">t &lt;= tCocheInferiorLLegaSemaforoMax</label>
 		</location>
-		<location id="id14" x="-357" y="-212">
+		<location id="id16" x="-357" y="-212">
 			<name x="-408" y="-246">EsperaPorRojo</name>
 		</location>
-		<location id="id15" x="8" y="25">
+		<location id="id17" x="8" y="25">
 			<name x="25" y="17">Cruzando</name>
 			<label kind="invariant" x="0" y="51">t &lt;= tCocheInferiorEnCruceMax</label>
 		</location>
-		<location id="id16" x="-357" y="255">
+		<location id="id18" x="-357" y="255">
 			<name x="-391" y="272">HaCruzado</name>
 			<label kind="invariant" x="-391" y="289">t &lt;= tCocheInferiorLejosMax</label>
 		</location>
-		<init ref="id13"/>
-		<transition id="id17">
-			<source ref="id16"/>
-			<target ref="id13"/>
+		<init ref="id15"/>
+		<transition id="id19">
+			<source ref="id18"/>
+			<target ref="id15"/>
 			<label kind="guard" x="-705" y="178">t &gt;= tCocheInferiorLejosMin</label>
 			<label kind="assignment" x="-705" y="195">t := 0</label>
 		</transition>
-		<transition id="id18">
-			<source ref="id15"/>
-			<target ref="id16"/>
+		<transition id="id20">
+			<source ref="id17"/>
+			<target ref="id18"/>
 			<label kind="guard" x="-136" y="153">t &gt;= tCocheInferiorEnCruceMin</label>
 			<label kind="assignment" x="-136" y="178">t := 0,
 cochesEnCruceInferior--</label>
 		</transition>
-		<transition id="id19">
-			<source ref="id14"/>
-			<target ref="id15"/>
+		<transition id="id21">
+			<source ref="id16"/>
+			<target ref="id17"/>
 			<label kind="synchronisation" x="-170" y="-170">cochePasteurVerde?</label>
 			<label kind="assignment" x="-161" y="-144">t := 0, 
 cochesEnCruceInferior++</label>
 		</transition>
-		<transition id="id20">
-			<source ref="id13"/>
-			<target ref="id15"/>
+		<transition id="id22">
+			<source ref="id15"/>
+			<target ref="id17"/>
 			<label kind="guard" x="-501" y="-68">semaforoCocheInferiorPasteur == 1 &amp;&amp; 
 t &gt;= tCocheInferiorLLegaSemaforoMin</label>
 			<label kind="assignment" x="-501" y="-25">t := 0,
 cochesEnCruceInferior++</label>
 		</transition>
-		<transition id="id21">
-			<source ref="id13"/>
-			<target ref="id14"/>
+		<transition id="id23">
+			<source ref="id15"/>
+			<target ref="id16"/>
 			<label kind="guard" x="-782" y="-161">semaforoCocheInferiorPasteur == 0 &amp;&amp; 
 t &gt;= tCocheInferiorLLegaSemaforoMax</label>
 			<label kind="assignment" x="-782" y="-119">t := 0</label>
@@ -211,33 +228,33 @@ t &gt;= tCocheInferiorLLegaSemaforoMax</label>
 	</template>
 	<template>
 		<name>SemaforoCocheInferiorLouisPasteur</name>
-		<location id="id22" x="-416" y="-119">
+		<location id="id24" x="-416" y="-119">
 			<name x="-501" y="-136">Verde</name>
 			<label kind="comments" x="-901" y="-127">Inicia en verde porque el sistema inicia 
 con los metros en la parada, y por lo tanto,
 el resto de semáforos en rojo.</label>
 		</location>
-		<location id="id23" x="-76" y="-119">
+		<location id="id25" x="-76" y="-119">
 			<name x="-86" y="-153">Rojo</name>
 		</location>
-		<location id="id24" x="-212" y="-25">
+		<location id="id26" x="-212" y="-25">
 			<committed/>
 		</location>
-		<init ref="id22"/>
-		<transition id="id25">
-			<source ref="id24"/>
-			<target ref="id22"/>
+		<init ref="id24"/>
+		<transition id="id27">
+			<source ref="id26"/>
+			<target ref="id24"/>
 			<label kind="synchronisation" x="-416" y="-51">cochePasteurVerde!</label>
 		</transition>
-		<transition id="id26">
-			<source ref="id23"/>
-			<target ref="id24"/>
+		<transition id="id28">
+			<source ref="id25"/>
+			<target ref="id26"/>
 			<label kind="synchronisation" x="-127" y="-76">metroAproximando?</label>
 			<label kind="assignment" x="-127" y="-59">semaforoCocheInferiorPasteur = 1</label>
 		</transition>
-		<transition id="id27">
-			<source ref="id22"/>
-			<target ref="id23"/>
+		<transition id="id29">
+			<source ref="id24"/>
+			<target ref="id25"/>
 			<label kind="synchronisation" x="-331" y="-178">metroSaliendo?</label>
 			<label kind="assignment" x="-391" y="-153">semaforoCocheInferiorPasteur = 0</label>
 		</transition>
@@ -245,25 +262,25 @@ el resto de semáforos en rojo.</label>
 	<template>
 		<name>SemaforoCocheInferior</name>
 		<parameter>int[0,1] d</parameter>
-		<location id="id28" x="-51" y="-161">
+		<location id="id30" x="-51" y="-161">
 			<name x="-8" y="-169">Rojo</name>
 		</location>
-		<location id="id29" x="-399" y="-161">
+		<location id="id31" x="-399" y="-161">
 			<name x="-476" y="-169">Verde</name>
 		</location>
-		<location id="id30" x="-229" y="-51">
+		<location id="id32" x="-229" y="-51">
 			<committed/>
 		</location>
-		<init ref="id28"/>
-		<transition id="id31">
-			<source ref="id30"/>
-			<target ref="id29"/>
+		<init ref="id30"/>
+		<transition id="id33">
+			<source ref="id32"/>
+			<target ref="id31"/>
 			<label kind="synchronisation" x="-493" y="-102">verdeCocheInf[d]!</label>
 			<label kind="assignment" x="-493" y="-76">semaforoCocheInferior[d] = 1</label>
 		</transition>
-		<transition id="id32">
-			<source ref="id28"/>
-			<target ref="id30"/>
+		<transition id="id34">
+			<source ref="id30"/>
+			<target ref="id32"/>
 			<label kind="guard" x="-136" y="-102">metrosEnCruce == 1 &amp;&amp;
 metrosEnParada == 0</label>
 			<label kind="synchronisation" x="-136" y="-59">metroSaliendo?</label>
@@ -272,9 +289,9 @@ metrosEnCruce == 1
 En vez de 0, porque ese último metro es 
 el que manda la señal de metroSaliendo</label>
 		</transition>
-		<transition id="id33">
-			<source ref="id29"/>
-			<target ref="id28"/>
+		<transition id="id35">
+			<source ref="id31"/>
+			<target ref="id30"/>
 			<label kind="synchronisation" x="-340" y="-221">metroAproximando?</label>
 			<label kind="assignment" x="-340" y="-204">semaforoCocheInferior[d] = 0</label>
 		</transition>
@@ -282,69 +299,73 @@ el que manda la señal de metroSaliendo</label>
 	<template>
 		<name>Metro</name>
 		<declaration>clock t;</declaration>
-		<location id="id34" x="425" y="-8">
+		<location id="id36" x="425" y="-8">
 			<name x="434" y="-42">FueraCruce</name>
 			<label kind="invariant" x="441" y="-17">t &lt;= tMetroLejosMax</label>
 		</location>
-		<location id="id35" x="-306" y="94">
+		<location id="id37" x="-306" y="94">
 			<name x="-391" y="42">DentroCruce</name>
 			<label kind="invariant" x="-476" y="59">t &lt;= tMetroEnCruceMax</label>
 		</location>
-		<location id="id36" x="212" y="221">
+		<location id="id38" x="212" y="221">
 			<name x="202" y="187">enLaParada</name>
 			<label kind="invariant" x="161" y="238">t&lt;= tParadaMax</label>
 		</location>
-		<location id="id37" x="-161" y="264">
+		<location id="id39" x="-161" y="264">
 			<name x="-170" y="229">Alarma</name>
 			<label kind="invariant" x="-170" y="212">t &lt;= 5</label>
 		</location>
-		<init ref="id36"/>
-		<transition id="id38">
-			<source ref="id37"/>
-			<target ref="id37"/>
+		<init ref="id38"/>
+		<transition id="id40">
+			<source ref="id39"/>
+			<target ref="id39"/>
 			<label kind="guard" x="-196" y="357">t == 5 &amp;&amp;
-cochesEnCruce != 0</label>
-			<label kind="assignment" x="-195" y="399">t := 0</label>
+(cochesEnCruce != 0 ||
+ambulanciaEnCruce != 0)</label>
+			<label kind="assignment" x="-195" y="416">t := 0</label>
 			<nail x="-111" y="357"/>
 			<nail x="-213" y="357"/>
 		</transition>
-		<transition id="id39">
-			<source ref="id37"/>
-			<target ref="id35"/>
-			<label kind="guard" x="-408" y="212">cochesEnCruce == 0 &amp;&amp;
+		<transition id="id41">
+			<source ref="id39"/>
+			<target ref="id37"/>
+			<label kind="guard" x="-425" y="195">ambulanciaEnCruce == 0 &amp;&amp;
+cochesEnCruce == 0 &amp;&amp;
 t &gt;= 0</label>
-			<label kind="assignment" x="-408" y="246">t:=0 , 
+			<label kind="assignment" x="-425" y="255">t:=0 , 
 metrosEnCruce++,
 metrosEnParada--</label>
 		</transition>
-		<transition id="id40">
-			<source ref="id36"/>
-			<target ref="id37"/>
-			<label kind="guard" x="-60" y="255">cochesEnCruce != 0 &amp;&amp;
+		<transition id="id42">
+			<source ref="id38"/>
+			<target ref="id39"/>
+			<label kind="guard" x="-59" y="255">(ambulanciaEnCruce != 0 ||
+cochesEnCruce != 0) &amp;&amp;
 t &gt;= tParadaMax</label>
-			<label kind="assignment" x="-60" y="297">t := 0</label>
+			<label kind="assignment" x="-59" y="314">t := 0</label>
 		</transition>
-		<transition id="id41">
-			<source ref="id36"/>
-			<target ref="id35"/>
-			<label kind="guard" x="-8" y="68">cochesEnCruce == 0 &amp;&amp;
+		<transition id="id43">
+			<source ref="id38"/>
+			<target ref="id37"/>
+			<label kind="guard" x="-8" y="51">ambulanciaEnCruce == 0 &amp;&amp;
+cochesEnCruce == 0 &amp;&amp;
 t &gt;= tParadaMin</label>
 			<label kind="assignment" x="-8" y="110">t := 0 , 
 metrosEnCruce++,
 metrosEnParada--</label>
 		</transition>
-		<transition id="id42">
-			<source ref="id34"/>
-			<target ref="id36"/>
+		<transition id="id44">
+			<source ref="id36"/>
+			<target ref="id38"/>
 			<label kind="guard" x="441" y="110">t &gt;= tMetroLejosMin</label>
 			<label kind="synchronisation" x="441" y="136">metroAproximando!</label>
 			<label kind="assignment" x="441" y="161">t := 0,
 metrosEnParada++</label>
 			<nail x="416" y="204"/>
 		</transition>
-		<transition id="id43">
-			<source ref="id35"/>
-			<target ref="id34"/>
+		<transition id="id45">
+			<source ref="id37"/>
+			<target ref="id36"/>
 			<label kind="guard" x="-144" y="-76">t &gt;= tMetroEnCruceMin</label>
 			<label kind="synchronisation" x="-145" y="-59">metroSaliendo!</label>
 			<label kind="assignment" x="-145" y="-42">t := 0, 
@@ -355,22 +376,19 @@ metrosEnCruce--</label>
 	<template>
 		<name>SemaforoCoche</name>
 		<parameter>int[0,1] d</parameter>
-		<location id="id44" x="331" y="-153">
+		<location id="id46" x="331" y="-153">
 			<name x="340" y="-178">Rojo</name>
 		</location>
-		<location id="id45" x="-34" y="-51">
-			<name x="-93" y="-76">Verde</name>
+		<location id="id47" x="-8" y="-153">
+			<name x="-67" y="-178">Verde</name>
 		</location>
-		<location id="id46" x="85" y="-161">
+		<location id="id48" x="213" y="-51">
 			<committed/>
 		</location>
-		<location id="id47" x="213" y="-51">
-			<committed/>
-		</location>
-		<init ref="id44"/>
-		<transition id="id48">
-			<source ref="id44"/>
-			<target ref="id47"/>
+		<init ref="id46"/>
+		<transition id="id49">
+			<source ref="id46"/>
+			<target ref="id48"/>
 			<label kind="guard" x="289" y="-119">metrosEnCruce == 1 &amp;&amp;
 metrosEnParada == 0</label>
 			<label kind="synchronisation" x="289" y="-85">metroSaliendo?</label>
@@ -379,21 +397,16 @@ metrosEnCruce == 1
 En vez de 0, porque ese último metro es 
 el que manda la señal de metroSaliendo?</label>
 		</transition>
-		<transition id="id49">
-			<source ref="id45"/>
-			<target ref="id46"/>
-			<label kind="synchronisation" x="-110" y="-136">metroAproximando?</label>
-		</transition>
 		<transition id="id50">
-			<source ref="id47"/>
-			<target ref="id45"/>
-			<label kind="synchronisation" x="102" y="17">greenCoche[d]!</label>
-			<label kind="assignment" x="102" y="-9">semaforoCoche[d] = 1</label>
+			<source ref="id48"/>
+			<target ref="id47"/>
+			<label kind="synchronisation" x="-25" y="-50">greenCoche[d]!</label>
+			<label kind="assignment" x="-25" y="-76">semaforoCoche[d] = 1</label>
 		</transition>
 		<transition id="id51">
-			<source ref="id46"/>
-			<target ref="id44"/>
-			<label kind="synchronisation" x="170" y="-238">redCoche[d]!</label>
+			<source ref="id47"/>
+			<target ref="id46"/>
+			<label kind="synchronisation" x="170" y="-238">metroAproximando?</label>
 			<label kind="assignment" x="170" y="-221">semaforoCoche[d] = 0</label>
 		</transition>
 	</template>

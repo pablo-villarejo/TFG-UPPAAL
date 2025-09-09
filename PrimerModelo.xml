@@ -108,19 +108,16 @@ metrosEnCruce--</label>
 		<location id="id10" x="331" y="-153">
 			<name x="340" y="-178">Rojo</name>
 		</location>
-		<location id="id11" x="-34" y="-51">
-			<name x="-93" y="-76">Verde</name>
+		<location id="id11" x="-59" y="-136">
+			<name x="-118" y="-161">Verde</name>
 		</location>
-		<location id="id12" x="85" y="-161">
-			<committed/>
-		</location>
-		<location id="id13" x="213" y="-51">
+		<location id="id12" x="213" y="-51">
 			<committed/>
 		</location>
 		<init ref="id10"/>
-		<transition id="id14">
+		<transition id="id13">
 			<source ref="id10"/>
-			<target ref="id13"/>
+			<target ref="id12"/>
 			<label kind="guard" x="289" y="-119">metrosEnCruce == 1 &amp;&amp;
 metrosEnParada == 0</label>
 			<label kind="synchronisation" x="289" y="-85">metroSaliendo?</label>
@@ -129,81 +126,75 @@ metrosEnCruce == 1
 En vez de 0, porque ese último metro es 
 el que manda la señal de metroSaliendo?</label>
 		</transition>
-		<transition id="id15">
+		<transition id="id14">
 			<source ref="id11"/>
-			<target ref="id12"/>
-			<label kind="synchronisation" x="-110" y="-136">metroAproximando?</label>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="51" y="-195">metroAproximando?</label>
+			<label kind="assignment" x="42" y="-178">semaforoCoche[d] = 0</label>
 		</transition>
-		<transition id="id16">
-			<source ref="id13"/>
+		<transition id="id15">
+			<source ref="id12"/>
 			<target ref="id11"/>
 			<label kind="synchronisation" x="102" y="17">greenCoche[d]!</label>
 			<label kind="assignment" x="102" y="-9">semaforoCoche[d] = 1</label>
 			<nail x="196" y="-34"/>
 			<nail x="153" y="-34"/>
 		</transition>
-		<transition id="id17">
-			<source ref="id12"/>
-			<target ref="id10"/>
-			<label kind="synchronisation" x="170" y="-238">redCoche[d]!</label>
-			<label kind="assignment" x="170" y="-221">semaforoCoche[d] = 0</label>
-			<nail x="119" y="-178"/>
-		</transition>
 	</template>
 	<template>
 		<name>Coche</name>
 		<parameter>int[0,1] d</parameter>
 		<declaration>clock t;</declaration>
-		<location id="id18" x="-119" y="-238">
+		<location id="id16" x="-119" y="-238">
 			<name x="-178" y="-280">EsperaPorRojo</name>
 		</location>
-		<location id="id19" x="204" y="0">
+		<location id="id17" x="204" y="0">
 			<name x="221" y="-17">Cruzando</name>
 			<label kind="invariant" x="238" y="25">t&lt;=tCocheEnCruceMax</label>
 		</location>
-		<location id="id20" x="-76" y="170">
+		<location id="id18" x="-76" y="170">
 			<name x="-110" y="187">HaCruzado</name>
 			<label kind="invariant" x="-102" y="212">t&lt;=tCocheLejosMax</label>
 		</location>
-		<location id="id21" x="-425" y="0">
+		<location id="id19" x="-425" y="0">
 			<name x="-519" y="-8">Llegando</name>
 			<label kind="invariant" x="-654" y="17">t &lt;= tCocheLLegaSemaforoMax</label>
 		</location>
-		<init ref="id21"/>
-		<transition id="id22">
-			<source ref="id21"/>
-			<target ref="id19"/>
+		<init ref="id19"/>
+		<transition id="id20">
+			<source ref="id19"/>
+			<target ref="id17"/>
 			<label kind="guard" x="-195" y="-93">semaforoCoche[d] == 1 &amp;&amp; 
 t &gt;= tCocheLLegaSemaforoMin</label>
 			<label kind="assignment" x="-195" y="-50">t:=0,
 cochesEnCruce++</label>
 			<nail x="-59" y="0"/>
 		</transition>
-		<transition id="id23">
-			<source ref="id21"/>
-			<target ref="id18"/>
+		<transition id="id21">
+			<source ref="id19"/>
+			<target ref="id16"/>
 			<label kind="guard" x="-493" y="-187">semaforoCoche[d] == 0 &amp;&amp; 
 t &gt;= tCocheLLegaSemaforoMax</label>
 			<label kind="assignment" x="-493" y="-144">t := 0</label>
 		</transition>
-		<transition id="id24">
-			<source ref="id20"/>
-			<target ref="id21"/>
+		<transition id="id22">
+			<source ref="id18"/>
+			<target ref="id19"/>
 			<label kind="guard" x="-331" y="119">t&gt;=tCocheLejosMin</label>
 			<label kind="assignment" x="-331" y="136">t := 0</label>
 		</transition>
-		<transition id="id25">
-			<source ref="id18"/>
-			<target ref="id19"/>
+		<transition id="id23">
+			<source ref="id16"/>
+			<target ref="id17"/>
 			<label kind="synchronisation" x="25" y="-246">greenCoche[d]?</label>
 			<label kind="assignment" x="25" y="-221">t:=0 ,
 cochesEnCruce++</label>
 			<nail x="0" y="-161"/>
 			<nail x="102" y="-85"/>
 		</transition>
-		<transition id="id26">
-			<source ref="id19"/>
-			<target ref="id20"/>
+		<transition id="id24">
+			<source ref="id17"/>
+			<target ref="id18"/>
 			<label kind="guard" x="102" y="102">t&gt;=tCocheEnCruceMin</label>
 			<label kind="assignment" x="102" y="119">cochesEnCruce--,
 t := 0</label>

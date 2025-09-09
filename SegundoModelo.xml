@@ -60,7 +60,9 @@ const int tCocheHaCruzadoInfMin = 10;
 </declaration>
 	<template>
 		<name>CocheInferiorLouisPasteur</name>
-		<declaration>clock t;</declaration>
+		<declaration>clock t;
+
+clock tEsperando;</declaration>
 		<location id="id0" x="-671" y="17">
 			<name x="-764" y="8">Llegando</name>
 			<label kind="invariant" x="-926" y="59">t &lt;= tCocheInferiorLLegaSemaforoMax</label>
@@ -110,14 +112,15 @@ cochesEnCruceInferior++</label>
 			<target ref="id1"/>
 			<label kind="guard" x="-782" y="-161">semaforoCocheInferiorPasteur == 0 &amp;&amp; 
 t &gt;= tCocheInferiorLLegaSemaforoMax</label>
-			<label kind="assignment" x="-782" y="-119">t := 0</label>
+			<label kind="assignment" x="-782" y="-119">t := 0,
+tEsperando :=0</label>
 		</transition>
 	</template>
 	<template>
 		<name>SemaforoCocheInferiorLouisPasteur</name>
 		<location id="id9" x="-416" y="-119">
 			<name x="-501" y="-136">Verde</name>
-			<label kind="comments" x="-901" y="-127">Inicia en verde porque el sistema inicia 
+			<label kind="comments" x="-782" y="-102">Inicia en verde porque el sistema inicia 
 con los metros en la parada, y por lo tanto,
 el resto de semáforos en rojo.</label>
 		</location>
@@ -142,6 +145,8 @@ el resto de semáforos en rojo.</label>
 		<transition id="id14">
 			<source ref="id9"/>
 			<target ref="id10"/>
+			<label kind="guard" x="-365" y="-221">metrosEnCruce == 1 &amp;&amp;
+metrosEnParada == 0</label>
 			<label kind="synchronisation" x="-331" y="-178">metroSaliendo?</label>
 			<label kind="assignment" x="-391" y="-153">semaforoCocheInferiorPasteur = 0</label>
 		</transition>
